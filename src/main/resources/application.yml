@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: aetha_backend
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: aetha_db
+  security:
+    user:
+      name: admin
+      password: adminpassword
