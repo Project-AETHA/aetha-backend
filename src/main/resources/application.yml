@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: aetha_backend
+  data:
+    mongodb:
+      uri: mongodb+srv://aetha_dev:aethadev%401256@aetha-cluster.6wbuwdx.mongodb.net/aetha_db?retryWrites=true&w=majority&appName=aetha-cluster
+      authentication-database: admin
+      username: aetha_dev
+      password: aethadev@1256
+  security:
+    user:
+      name: admin
+      password: adminpassword
+  app:
+    jwtSecret: 1a8a5fc2bae92e78ca36dc26642c6f8fa69af0683542bc365552284baf251fccs
+    jwtExpiration: 7200000
