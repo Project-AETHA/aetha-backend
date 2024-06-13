@@ -37,7 +37,7 @@ public class HomeController {
         responseDTO.setMessage("Landing Page");
         responseDTO.setContent(blogs);
 
-        return new ResponseEntity<>(responseDTO, HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(responseDTO, HttpStatus.OK);
     }
 
     //? For testing the Role based authentication - For Reader
@@ -49,7 +49,7 @@ public class HomeController {
 
         // Set the content like all the books here
         responseDTO.setContent(null);
-        return new ResponseEntity<>(responseDTO, HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(responseDTO, HttpStatus.OK);
     }
 
     //? For testing the Role based authentication - For Writer
@@ -60,7 +60,7 @@ public class HomeController {
         responseDTO.setMessage("Welcome, Writer");
         responseDTO.setContent(null);
 
-        return new ResponseEntity<>(responseDTO, HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(responseDTO, HttpStatus.OK);
     }
 
 }

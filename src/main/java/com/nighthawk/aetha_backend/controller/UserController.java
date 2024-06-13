@@ -50,12 +50,12 @@ public class UserController {
                 responseDTO.setCode(VarList.RSP_SUCCESS);
                 responseDTO.setMessage("Listing all users");
                 responseDTO.setContent(users);
-                return new ResponseEntity<>(responseDTO, HttpStatus.ACCEPTED);
+                return new ResponseEntity<>(responseDTO, HttpStatus.OK);
             } else {
                 responseDTO.setCode(VarList.RSP_FAIL);
                 responseDTO.setMessage("No users found");
                 responseDTO.setContent(null);
-                return new ResponseEntity<>(responseDTO, HttpStatus.ACCEPTED);
+                return new ResponseEntity<>(responseDTO, HttpStatus.OK);
             }
         } catch (Exception e) {
             responseDTO.setCode(VarList.RSP_ERROR);
@@ -79,7 +79,7 @@ public class UserController {
                     responseDTO.setCode(VarList.RSP_SUCCESS);
                     responseDTO.setMessage("User Created");
                     responseDTO.setContent(user);
-                    return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
+                    return new ResponseEntity<>(responseDTO, HttpStatus.OK);
 
                 default:
                     responseDTO.setCode(VarList.RSP_ERROR);
@@ -141,7 +141,7 @@ public class UserController {
                 responseDTO.setMessage("User found");
                 responseDTO.setContent(user);
 
-                return new ResponseEntity<>(responseDTO, HttpStatus.FOUND);
+                return new ResponseEntity<>(responseDTO, HttpStatus.OK);
             } else {
                 responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
                 responseDTO.setMessage("User not found");
@@ -154,7 +154,7 @@ public class UserController {
             responseDTO.setMessage("Server Error");
             responseDTO.setContent(null);
 
-            return new ResponseEntity<>(responseDTO, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(responseDTO, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
