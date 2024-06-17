@@ -4,6 +4,7 @@ import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DocumentReference;
 
 @Data
 @Document("blogs")
@@ -14,7 +15,8 @@ public class Blog {
     @Indexed
     private String title;
     private String body;
+    @DocumentReference(collection = "users")
     @Indexed
-    private String author;
+    private AuthUser author;
 
 }
