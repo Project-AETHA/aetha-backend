@@ -16,6 +16,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -42,22 +43,24 @@ public class UserController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/all-users")
-    public ResponseEntity<?> getAllUsers() {
+    public ResponseEntity<?> getAllUsers(@AuthenticationPrincipal UserDetails userDetails) {
         try {
 
             List<AuthUser> users = userService.getAllUsers();
+
+            System.out.println(userService.findUserByUsername(userDetails.getUsername()));
 
             if(!users.isEmpty()) {
                 responseDTO.setCode(VarList.RSP_SUCCESS);
                 responseDTO.setMessage("Listing all users");
                 responseDTO.setContent(users);
-                return new ResponseEntity<>(responseDTO, HttpStatus.OK);
             } else {
                 responseDTO.setCode(VarList.RSP_FAIL);
                 responseDTO.setMessage("No users found");
                 responseDTO.setContent(null);
-                return new ResponseEntity<>(responseDTO, HttpStatus.OK);
             }
+            return new ResponseEntity<>(responseDTO, HttpStatus.OK);
+
         } catch (Exception e) {
             responseDTO.setCode(VarList.RSP_ERROR);
             responseDTO.setMessage(e.getMessage());
