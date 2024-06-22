@@ -13,4 +13,4 @@ spring:
       password: adminpassword
   app:
     jwtSecret: 1a8a5fc2bae92e78ca36dc26642c6f8fa69af0683542bc365552284baf251fccs
-    jwtExpiration: 7200000
+    jwtExpiration: 86400000 # 24 hours

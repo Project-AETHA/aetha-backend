@@ -36,7 +36,15 @@ public class SecurityConfig {
                 //* Authorizing routes with the matching urls
                 .authorizeHttpRequests
                         (auth -> auth
-                            .requestMatchers("/api/user/register","/api/user/login" ,"/error","/api")
+                            .requestMatchers(
+                                    "/api/auth/**",
+                                    "/error",
+                                    "/api",
+                                    "/swagger-ui/**",
+                                    "/v3/api-docs/**",
+                                    "/api/files/**",
+                                    "/api/books"
+                            )
                             .permitAll()
                             .anyRequest().authenticated()
                         )
