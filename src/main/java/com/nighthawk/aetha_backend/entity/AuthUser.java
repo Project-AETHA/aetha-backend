@@ -17,12 +17,20 @@ public class AuthUser {
     private String id;
     @Indexed
     private String username;
+    private String displayName;
     private String email;
     private String firstname;
     private String lastname;
+    private String image;
     private String gender;
     private String password;
     private Date birthdate;
     private Role role;
+
+    @Builder.Default
+    private Boolean enabled = true;
+
+    @Builder.Default
+    private Boolean deleted = false;
 
 }

@@ -15,7 +15,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -61,18 +60,20 @@ public class BookController {
     ) {
 
         System.out.println("Authentic");
-        Optional<AuthUser> tempUser = userService.findUserByUsername(userDetails.getUsername());
+        AuthUser user = userService.findByEmail(userDetails.getUsername());
 
-        if(tempUser.isPresent()) {
+        if(user != null) {
             try {
-                AuthUser user = tempUser.get();
-
                 book.setAuthor(user);
+
                 repository.save(book);
+
                 responseDTO.setCode(VarList.RSP_SUCCESS);
                 responseDTO.setMessage("The book '" + book.getName() + "' was saved.");
                 responseDTO.setContent(book);
+
             } catch (Exception e) {
+
                 responseDTO.setCode(VarList.RSP_FAIL);
                 responseDTO.setMessage("Saving the book failed");
                 responseDTO.setContent(book);
