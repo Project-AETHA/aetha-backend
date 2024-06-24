@@ -80,7 +80,7 @@ public class AuthService {
                     .map(item -> item.getAuthority())
                     .collect(Collectors.toList());
 
-            LoginResponse response = new LoginResponse(userDetails.getUsername(), roles, jwtToken);
+            LoginResponse response = new LoginResponse(userDetails.getUsername(), roles, jwtToken, user);
 
             responseDTO.setCode(VarList.RSP_SUCCESS);
             responseDTO.setMessage("Login Successful");
