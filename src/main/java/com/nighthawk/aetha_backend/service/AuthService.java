@@ -3,12 +3,14 @@ package com.nighthawk.aetha_backend.service;
 import com.nighthawk.aetha_backend.dto.LoginRequest;
 import com.nighthawk.aetha_backend.dto.LoginResponse;
 import com.nighthawk.aetha_backend.dto.ResponseDTO;
+import com.nighthawk.aetha_backend.dto.UserDTO;
 import com.nighthawk.aetha_backend.entity.AuthUser;
 import com.nighthawk.aetha_backend.entity.Role;
 import com.nighthawk.aetha_backend.repository.AuthUserRepository;
 import com.nighthawk.aetha_backend.utils.Jwtutils;
 import com.nighthawk.aetha_backend.utils.VarList;
 import lombok.AllArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -80,7 +82,9 @@ public class AuthService {
                     .map(item -> item.getAuthority())
                     .collect(Collectors.toList());
 
-            LoginResponse response = new LoginResponse(userDetails.getUsername(), roles, jwtToken, user);
+            ModelMapper modelMapper = new ModelMapper();
+
+            LoginResponse response = new LoginResponse(userDetails.getUsername(), roles, jwtToken, modelMapper.map(user, UserDTO.class));
 
             responseDTO.setCode(VarList.RSP_SUCCESS);
             responseDTO.setMessage("Login Successful");
@@ -116,6 +120,8 @@ public class AuthService {
                                 ? Role.WRITER
                                 : Role.READER
             );
+            user.setEnabled(true);
+            user.setDeleted(false);
 
             userRepository.save(user);
 
