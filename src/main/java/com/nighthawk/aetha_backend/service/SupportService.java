@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class SupportService {
@@ -58,6 +59,30 @@ public class SupportService {
             responseDTO.setCode(VarList.RSP_SUCCESS);
             responseDTO.setMessage("Tickets retrieved successfully");
             responseDTO.setContent(supportRepository.findAll());
+        } catch (Exception e) {
+            responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
+            responseDTO.setMessage("An error occurred while retrieving tickets");
+        }
+
+        return responseDTO;
+    }
+
+    public ResponseDTO getTicketByEmail(UserDetails userDetails) {
+        try {
+
+            AuthUser user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
+
+            if(user != null) {
+                List<SupportTicket> tickets = supportRepository.findByAuthor(user);
+
+                responseDTO.setCode(VarList.RSP_SUCCESS);
+                responseDTO.setMessage("Tickets retrieved successfully");
+                responseDTO.setContent(tickets);
+            } else {
+                responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
+                responseDTO.setMessage("User not found");
+            }
+
         } catch (Exception e) {
             responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
             responseDTO.setMessage("An error occurred while retrieving tickets");

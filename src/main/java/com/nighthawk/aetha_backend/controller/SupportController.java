@@ -30,4 +30,9 @@ public class SupportController {
         return ResponseEntity.ok(supportService.getAllTickets());
     }
 
+    @GetMapping("/support/get_my_tickets")
+    public ResponseEntity<ResponseDTO> getMyTickets(@AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(supportService.getTicketByEmail(userDetails));
+    }
+
 }
