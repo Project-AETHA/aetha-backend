@@ -4,6 +4,7 @@ import com.nighthawk.aetha_backend.dto.LoginRequest;
 import com.nighthawk.aetha_backend.dto.LoginResponse;
 import com.nighthawk.aetha_backend.dto.ResponseDTO;
 import com.nighthawk.aetha_backend.dto.UserDTO;
+import com.nighthawk.aetha_backend.entity.AccStatus;
 import com.nighthawk.aetha_backend.entity.AuthUser;
 import com.nighthawk.aetha_backend.entity.Role;
 import com.nighthawk.aetha_backend.repository.AuthUserRepository;
@@ -47,13 +48,13 @@ public class AuthService {
 
         AuthUser user = userRepository.findByEmail(loginRequest.getEmail()).orElse(null);
 
-        if(user != null && !user.getEnabled()) {
+        if(user != null && user.getStatus() == AccStatus.DISABLED) {
             responseDTO.setCode(VarList.RSP_FAIL);
             responseDTO.setMessage("User is disabled");
             responseDTO.setContent(null);
 
             return responseDTO;
-        } else if(user != null && user.getDeleted()) {
+        } else if(user != null && user.getStatus() == AccStatus.DELETED) {
             responseDTO.setCode(VarList.RSP_FAIL);
             responseDTO.setMessage("User was deleted");
             responseDTO.setContent(null);
@@ -120,8 +121,7 @@ public class AuthService {
                                 ? Role.WRITER
                                 : Role.READER
             );
-            user.setEnabled(true);
-            user.setDeleted(false);
+            user.setStatus(AccStatus.ACTIVE);
 
             userRepository.save(user);
 

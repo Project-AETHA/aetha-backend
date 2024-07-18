@@ -1,5 +1,6 @@
 package com.nighthawk.aetha_backend.dto;
 
+import com.nighthawk.aetha_backend.entity.AccStatus;
 import com.nighthawk.aetha_backend.entity.Role;
 import lombok.Data;
 
@@ -17,5 +18,6 @@ public class UserDTO {
     private String gender;
     private Date birthdate;
     private Role role;
+    private AccStatus status;
 
 }

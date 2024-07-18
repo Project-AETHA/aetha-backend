@@ -26,7 +26,6 @@ public class AuthUser {
     private String password;
     private Date birthdate;
     private Role role;
-    private Boolean enabled;
-    private Boolean deleted;
+    private AccStatus status;
 
 }
