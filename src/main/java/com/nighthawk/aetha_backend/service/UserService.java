@@ -1,6 +1,7 @@
 package com.nighthawk.aetha_backend.service;
 
 import com.nighthawk.aetha_backend.dto.ResponseDTO;
+import com.nighthawk.aetha_backend.entity.AccStatus;
 import com.nighthawk.aetha_backend.entity.AuthUser;
 import com.nighthawk.aetha_backend.repository.AuthUserRepository;
 import com.nighthawk.aetha_backend.utils.VarList;
@@ -89,7 +90,7 @@ public class UserService {
         AuthUser user = repository.findByEmail(email).orElse(null);
 
         if(user != null) {
-            user.setDeleted(true);
+            user.setStatus(AccStatus.DELETED);
             repository.save(user);
             return user;
         } else {
