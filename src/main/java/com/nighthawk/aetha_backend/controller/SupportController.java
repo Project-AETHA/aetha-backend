@@ -28,6 +28,18 @@ public class SupportController {
         return ResponseEntity.ok(supportService.createTicket(title, category, description, files, userDetails));
     }
 
+    @PostMapping("/support/update_ticket/{id}")
+    public ResponseEntity<ResponseDTO> updateTicket(
+            @RequestPart("title") String title,
+            @RequestPart("category") String category,
+            @RequestPart("description") String description,
+            @RequestPart(value = "files", required = false) MultipartFile[] files,
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable String id
+    ){
+        return ResponseEntity.ok(supportService.updateTicket(title, category, description, files, userDetails, id));
+    }
+
     @GetMapping("/support/get_all_tickets")
     public ResponseEntity<ResponseDTO> getAllTickets() {
         return ResponseEntity.ok(supportService.getAllTickets());
@@ -36,6 +48,16 @@ public class SupportController {
     @GetMapping("/support/get_my_tickets")
     public ResponseEntity<ResponseDTO> getMyTickets(@AuthenticationPrincipal UserDetails userDetails) {
         return ResponseEntity.ok(supportService.getTicketByEmail(userDetails));
+    }
+
+    @GetMapping("/support/get_ticket/{id}")
+    public ResponseEntity<ResponseDTO> getTicketById(@PathVariable String id) {
+        return ResponseEntity.ok(supportService.getTicketById(id));
+    }
+
+    @DeleteMapping("/support/delete_ticket/{id}")
+    public ResponseEntity<ResponseDTO> deleteTicket(@PathVariable String id) {
+        return ResponseEntity.ok(supportService.deleteTicket(id));
     }
 
 }
