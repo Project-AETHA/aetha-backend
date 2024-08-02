@@ -30,6 +30,7 @@ public class NoteController {
     //? Route open for all users including guest users
     //? For testing the Role based authentication - For Reader
 
+    @CrossOrigin
     @PreAuthorize("hasRole('WRITER')")
     @GetMapping("/get-my-notes")
     public ResponseEntity<ResponseDTO> getNotesById(@AuthenticationPrincipal UserDetails userDetails) {
