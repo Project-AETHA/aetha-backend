@@ -25,7 +25,7 @@ public class SupportTicket {
     private String title;
 
     @NotNull
-    private String category;
+    private SupportType category = SupportType.COMPLAINT;
     private String description;
 
     private Date createdAt;

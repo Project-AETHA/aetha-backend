@@ -3,6 +3,7 @@ package com.nighthawk.aetha_backend.service;
 import com.nighthawk.aetha_backend.dto.ResponseDTO;
 import com.nighthawk.aetha_backend.entity.AuthUser;
 import com.nighthawk.aetha_backend.entity.SupportTicket;
+import com.nighthawk.aetha_backend.entity.SupportType;
 import com.nighthawk.aetha_backend.repository.AuthUserRepository;
 import com.nighthawk.aetha_backend.repository.SupportTicketRepository;
 import com.nighthawk.aetha_backend.utils.FileUploadUtil;
@@ -49,7 +50,8 @@ public class SupportService {
 
             } else {
                 ticket.setTitle(title);
-                ticket.setCategory(category);
+                ticket.setCategory(SupportType.valueOf(category.toUpperCase()));
+                System.out.println("Category: " + category);
                 ticket.setDescription(description);
                 ticket.setCreatedAt(new Date());
                 ticket.setAuthor(user);
@@ -183,7 +185,7 @@ public class SupportService {
                 responseDTO.setMessage("Ticket not found");
             } else {
                 ticket.setTitle(title);
-                ticket.setCategory(category);
+                ticket.setCategory(SupportType.valueOf(category.toUpperCase()));
                 ticket.setDescription(description);
 
                 //? Saving the complaint ticket object without the attachments(files)

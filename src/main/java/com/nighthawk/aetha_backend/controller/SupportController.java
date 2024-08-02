@@ -1,6 +1,7 @@
 package com.nighthawk.aetha_backend.controller;
 
 import com.nighthawk.aetha_backend.dto.ResponseDTO;
+import com.nighthawk.aetha_backend.entity.SupportType;
 import com.nighthawk.aetha_backend.service.SupportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +26,7 @@ public class SupportController {
             @RequestPart(value = "files", required = false) MultipartFile[] files,
             @AuthenticationPrincipal UserDetails userDetails
     ){
+        System.out.println(category);
         return ResponseEntity.ok(supportService.createTicket(title, category, description, files, userDetails));
     }
 
