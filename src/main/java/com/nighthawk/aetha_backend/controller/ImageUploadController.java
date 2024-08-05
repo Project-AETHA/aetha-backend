@@ -13,7 +13,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/files")
@@ -30,7 +29,7 @@ public class ImageUploadController {
 
         String uploadLocation = "books";
         Arrays.asList(files).stream().forEach(file -> {
-            String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
+            String fileName = StringUtils.cleanPath(file.getOriginalFilename()+"Something");
             System.out.println(fileName);
 
             try {

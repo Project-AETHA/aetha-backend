@@ -26,11 +26,6 @@ public class AuthUser {
     private String password;
     private Date birthdate;
     private Role role;
-
-    @Builder.Default
-    private Boolean enabled = true;
-
-    @Builder.Default
-    private Boolean deleted = false;
+    private AccStatus status;
 
 }

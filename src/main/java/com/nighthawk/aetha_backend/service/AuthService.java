@@ -3,12 +3,15 @@ package com.nighthawk.aetha_backend.service;
 import com.nighthawk.aetha_backend.dto.LoginRequest;
 import com.nighthawk.aetha_backend.dto.LoginResponse;
 import com.nighthawk.aetha_backend.dto.ResponseDTO;
+import com.nighthawk.aetha_backend.dto.UserDTO;
+import com.nighthawk.aetha_backend.entity.AccStatus;
 import com.nighthawk.aetha_backend.entity.AuthUser;
 import com.nighthawk.aetha_backend.entity.Role;
 import com.nighthawk.aetha_backend.repository.AuthUserRepository;
 import com.nighthawk.aetha_backend.utils.Jwtutils;
 import com.nighthawk.aetha_backend.utils.VarList;
 import lombok.AllArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -45,13 +48,13 @@ public class AuthService {
 
         AuthUser user = userRepository.findByEmail(loginRequest.getEmail()).orElse(null);
 
-        if(user != null && !user.getEnabled()) {
+        if(user != null && user.getStatus() == AccStatus.DISABLED) {
             responseDTO.setCode(VarList.RSP_FAIL);
             responseDTO.setMessage("User is disabled");
             responseDTO.setContent(null);
 
             return responseDTO;
-        } else if(user != null && user.getDeleted()) {
+        } else if(user != null && user.getStatus() == AccStatus.DELETED) {
             responseDTO.setCode(VarList.RSP_FAIL);
             responseDTO.setMessage("User was deleted");
             responseDTO.setContent(null);
@@ -80,7 +83,9 @@ public class AuthService {
                     .map(item -> item.getAuthority())
                     .collect(Collectors.toList());
 
-            LoginResponse response = new LoginResponse(userDetails.getUsername(), roles, jwtToken);
+            ModelMapper modelMapper = new ModelMapper();
+
+            LoginResponse response = new LoginResponse(userDetails.getUsername(), roles, jwtToken, modelMapper.map(user, UserDTO.class));
 
             responseDTO.setCode(VarList.RSP_SUCCESS);
             responseDTO.setMessage("Login Successful");
@@ -116,6 +121,7 @@ public class AuthService {
                                 ? Role.WRITER
                                 : Role.READER
             );
+            user.setStatus(AccStatus.ACTIVE);
 
             userRepository.save(user);
 
