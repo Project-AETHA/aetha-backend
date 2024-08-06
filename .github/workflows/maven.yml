@@ -12,7 +12,7 @@ permissions:
   id-token: write
 
 jobs:
-  build:
+  build-backend:
 
     runs-on: ubuntu-latest
 
@@ -45,7 +45,7 @@ jobs:
 
     - name: Clone repository on VM
       run: |
-        ssh -o StrictHostKeyChecking=no -i aetha_vm_key.pem aetha_admin@40.117.74.134 "git clone https://github.com/your-org/your-repo.git ~/aetha_project"
+        ssh -o StrictHostKeyChecking=no -i aetha_vm_key.pem aetha_admin@40.117.74.134 "git clone https://github.com/Project-AETHA/aetha-backend.git ~/aetha_project"
 
     - name: Build and run application on VM
       run: |
