@@ -39,6 +39,10 @@ jobs:
         chmod 600 aetha_vm_key.pem
         ssh -o StrictHostKeyChecking=no -i aetha_vm_key.pem aetha_admin@40.117.74.134 "rm -rf /path/to/your/project/*"
 
+    - name: Ensure target directory exists
+      run: |
+        ssh -o StrictHostKeyChecking=no -i aetha_vm_key.pem aetha_admin@40.117.74.134 "mkdir -p /path/to/your/project && sudo chown -R aetha_admin /path/to/your/project"
+
     - name: Clone repository on VM
       run: |
         ssh -o StrictHostKeyChecking=no -i aetha_vm_key.pem aetha_admin@40.117.74.134 "git clone https://github.com/your-org/your-repo.git /path/to/your/project"
