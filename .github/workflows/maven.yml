@@ -37,7 +37,7 @@ jobs:
       run: |
         echo "${{ secrets.AETHA_VM_PRIVATE_KEY }}" > aetha_vm_key.pem
         chmod 600 aetha_vm_key.pem
-        ssh -o StrictHostKeyChecking=no -i aetha_vm_key.pem aetha_admin@40.117.74.134 "rm -rf ~/aetha-backend/*"
+        ssh -o StrictHostKeyChecking=no -i aetha_vm_key.pem aetha_admin@40.117.74.134 "rm -rf ~/aetha-backend"
 
     # - name: Ensure target directory exists
     #   run: |
