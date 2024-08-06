@@ -45,7 +45,7 @@ jobs:
 
     - name: Clone repository on VM
       env:
-        GH_PAT: ${{ secrets.GH_PAT }}
+        AETHA_BACKEND_PAT: ${{ secrets.AETHA_BACKEND_PAT }}
       run: |
         ssh -o StrictHostKeyChecking=no -i aetha_vm_key.pem aetha_admin@40.117.74.134 "git clone https://${AETHA_BACKEND_PAT}@github.com/Project-AETHA/aetha-backend.git ~/aetha-backend"
 
