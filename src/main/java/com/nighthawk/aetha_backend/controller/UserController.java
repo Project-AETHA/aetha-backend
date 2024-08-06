@@ -23,7 +23,7 @@ public class UserController {
     private final UserService userService;
     private final ResponseDTO responseDTO;
 
-
+    @CrossOrigin
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/all-users")
     public ResponseEntity<ResponseDTO> getAllUsers(@AuthenticationPrincipal UserDetails userDetails) {
