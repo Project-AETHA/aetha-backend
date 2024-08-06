@@ -39,20 +39,21 @@ jobs:
         chmod 600 aetha_vm_key.pem
         ssh -o StrictHostKeyChecking=no -i aetha_vm_key.pem aetha_admin@40.117.74.134 "rm -rf ~/aetha-backend/*"
 
-    - name: Ensure target directory exists
-      run: |
-        ssh -o StrictHostKeyChecking=no -i aetha_vm_key.pem aetha_admin@40.117.74.134 "mkdir -p ~/aetha-backend"
+    # - name: Ensure target directory exists
+    #   run: |
+    #     ssh -o StrictHostKeyChecking=no -i aetha_vm_key.pem aetha_admin@40.117.74.134 "mkdir -p ~/aetha-backend"
 
     - name: Clone repository on VM
       env:
         AETHA_BACKEND_PAT: ${{ secrets.AETHA_BACKEND_PAT }}
       run: |
-        ssh -o StrictHostKeyChecking=no -i aetha_vm_key.pem aetha_admin@40.117.74.134 "git clone https://${AETHA_BACKEND_PAT}@github.com/Project-AETHA/aetha-backend.git ~/aetha-backend"
+        ssh -o StrictHostKeyChecking=no -i aetha_vm_key.pem aetha_admin@40.117.74.134 "git clone https://${AETHA_BACKEND_PAT}@github.com/Project-AETHA/aetha-backend.git"
 
     - name: Build and run application on VM
       run: |
         ssh -o StrictHostKeyChecking=no -i aetha_vm_key.pem aetha_admin@40.117.74.134 << 'EOF'
           cd ~/aetha-backend
-          ./mvnw clean package
+          ./mvn clean package
+          sudo chmod +rw target/aetha_backend-0.0.1-SNAPSHOT.jar
           nohup java -jar target/aetha_backend-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
         EOF
