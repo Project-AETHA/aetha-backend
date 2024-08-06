@@ -37,20 +37,20 @@ jobs:
       run: |
         echo "${{ secrets.AETHA_VM_PRIVATE_KEY }}" > aetha_vm_key.pem
         chmod 600 aetha_vm_key.pem
-        ssh -o StrictHostKeyChecking=no -i aetha_vm_key.pem aetha_admin@40.117.74.134 "rm -rf /path/to/your/project/*"
+        ssh -o StrictHostKeyChecking=no -i aetha_vm_key.pem aetha_admin@40.117.74.134 "rm -rf ~/aetha_project/*"
 
     - name: Ensure target directory exists
       run: |
-        ssh -o StrictHostKeyChecking=no -i aetha_vm_key.pem aetha_admin@40.117.74.134 "mkdir -p /path/to/your/project && sudo chown -R aetha_admin /path/to/your/project"
+        ssh -o StrictHostKeyChecking=no -i aetha_vm_key.pem aetha_admin@40.117.74.134 "mkdir -p ~/aetha_project"
 
     - name: Clone repository on VM
       run: |
-        ssh -o StrictHostKeyChecking=no -i aetha_vm_key.pem aetha_admin@40.117.74.134 "git clone https://github.com/your-org/your-repo.git /path/to/your/project"
+        ssh -o StrictHostKeyChecking=no -i aetha_vm_key.pem aetha_admin@40.117.74.134 "git clone https://github.com/your-org/your-repo.git ~/aetha_project"
 
     - name: Build and run application on VM
       run: |
         ssh -o StrictHostKeyChecking=no -i aetha_vm_key.pem aetha_admin@40.117.74.134 << 'EOF'
-          cd /path/to/your/project
+          cd ~/aetha_project
           ./mvnw clean package
           nohup java -jar target/aetha_backend-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
         EOF
