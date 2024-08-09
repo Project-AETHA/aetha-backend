@@ -23,6 +23,7 @@ public class EbookExternal {
     @Indexed
     private AuthUser author;
 
+    private String cover_image;
     private String demo_loc;
     private String original_loc;
     private Date createdAt;

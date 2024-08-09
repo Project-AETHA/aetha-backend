@@ -11,6 +11,7 @@ import com.nighthawk.aetha_backend.utils.VarList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,6 +31,7 @@ public class SupportService {
     @Autowired
     private ResponseDTO responseDTO;
 
+    @Transactional
     public ResponseDTO createTicket(
             String title,
             String category,
