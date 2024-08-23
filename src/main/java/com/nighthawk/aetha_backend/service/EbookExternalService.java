@@ -31,7 +31,6 @@ public class EbookExternalService {
     @Autowired
     private EbookExternalRepository ebookRepository;
 
-    private final EbookFeedbackDTO feedbackDTO = new EbookFeedbackDTO();
     private final ResponseDTO responseDTO = new ResponseDTO();
 
     @Autowired
@@ -56,14 +55,9 @@ public class EbookExternalService {
             MultipartFile coverImage,
             UserDetails userDetails
     ) {
-        // ? Getting the user details of the person currently logged in to publish the ebook
-        // ? Return null if the user cannot be found (should not happen)
-
         AuthUser user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
         EbookExternal newBook = new EbookExternal();
-
-        // ? Hashmap to store the errors that occur during the validation process
-        HashMap<String, String> errors = new HashMap<String, String>();
+        HashMap<String, String> errors = new HashMap<>();
 
         try {
             if(user == null) {
@@ -71,12 +65,14 @@ public class EbookExternalService {
                 throw new Exception("User not found");
             }
 
-            // ? Setting the author of the ebook to the user who is publishing it
             newBook.setAuthor(user);
             newBook.setCreatedAt(new Date());
             newBook.setTitle(ebook.getTitle());
+            newBook.setDescription(ebook.getDescription());
+            newBook.setGenres(ebook.getGenres());
+            newBook.setTags(ebook.getTags());
             newBook.setSold_amount(0);
-            newBook.setPrice(ebook.getPrice());
+            newBook.setPrice(Double.valueOf(ebook.getPrice()));
 
             if (!isValidISBN(ebook.getIsbn())) {
                 errors.put("isbn", "Invalid ISBN format");
@@ -84,16 +80,11 @@ public class EbookExternalService {
                 newBook.setIsbn(ebook.getIsbn());
             }
 
-            // TODO document encryption decryption process
-
-            // ? Setting the location where the files will be uploaded
             String uploadLocation = "ebooks";
 
-            // ? Handling the cover image uploading process
             if(coverImage == null) errors.put("coverImage", "Cover image is not given");
             else {
                 String uploadLocationCover = "ebooks_covers";
-
                 String originalFileName = StringUtils.cleanPath(Objects.requireNonNull(coverImage.getOriginalFilename()));
                 String fileExtension = FileUploadUtil.getFileExtension(originalFileName);
 
@@ -102,10 +93,8 @@ public class EbookExternalService {
                     throw new Exception("Invalid File extension - Cover Image");
                 }
 
-                //? Create a new file name with the custom prefix and the original extension
                 String customFileName = newBook.getIsbn() + "_cover" + fileExtension;
 
-                // ? Saving the files on the storage
                 try {
                     FileUploadUtil.saveFile(uploadLocationCover, customFileName, coverImage);
                     newBook.setCover_image("/images/" + uploadLocationCover + "/" + customFileName);
@@ -114,7 +103,6 @@ public class EbookExternalService {
                 }
             }
 
-            // ? Handling file uploading and saving the file location to the database for demo file
             if(demoFile == null) errors.put("demoFile", "Demo file not found");
             else {
                 String originalFileName = StringUtils.cleanPath(Objects.requireNonNull(demoFile.getOriginalFilename()));
@@ -125,19 +113,16 @@ public class EbookExternalService {
                     throw new Exception("Invalid File extension - Demo File");
                 }
 
-                //? Create a new file name with the custom prefix and the original extension
                 String customFileName = newBook.getIsbn() + "_demo" + fileExtension;
 
-                // ? Saving the files on the storage
                 try {
                     FileUploadUtil.saveFile(uploadLocation, customFileName, demoFile, "documents");
                     newBook.setDemo_loc("/documents/" + uploadLocation + "/" + customFileName);
                 } catch (IOException e) {
-                    errors.put("demoFile", "IError saving demo file");
+                    errors.put("demoFile", "Error saving demo file");
                 }
             }
 
-            // ? Handling file uploading and saving the file location to the database for original file
             if(originalFile == null) errors.put("originalFile", "Original file not found");
             else {
                 String originalFileName = StringUtils.cleanPath(Objects.requireNonNull(originalFile.getOriginalFilename()));
@@ -148,14 +133,10 @@ public class EbookExternalService {
                     throw new Exception("Invalid File extension - Original File");
                 }
 
-                //? Create a new file name with the custom prefix and the original extension
                 String customFileName = newBook.getIsbn() + "_original" + fileExtension;
-
-                //? Encrypting the original file
                 SecretKey key = EncryptionUtil.generateKey();
                 byte[] encryptedData = EncryptionUtil.encrypt(originalFile.getBytes(), key);
 
-                // ? Saving the files on the storage
                 try {
                     FileUploadUtil.saveFile(uploadLocation, customFileName, encryptedData, "documents");
                     newBook.setOriginal_loc("/documents/" + uploadLocation + "/" + customFileName);
@@ -163,16 +144,13 @@ public class EbookExternalService {
                     errors.put("originalFile", "Error saving original file");
                 }
 
-//                // ? Saving the decrypted file for testing purpose
-//                try {
-//                    byte[] decryptedData = EncryptionUtil.decrypt(Base64.getEncoder().encodeToString(encryptedData), key);
-//                    String decryptedFileName = newBook.getIsbn() + "_decrypted" + fileExtension;
-//
-//                    // Saving the decrypted file
-//                    FileUploadUtil.saveFile(uploadLocation, decryptedFileName, decryptedData, "documents");
-//                } catch (Exception e) {
-//                    errors.put("originalFile", "Error decrypting and saving original file");
-//                }
+                try {
+                    byte[] decryptedData = EncryptionUtil.decrypt(Base64.getEncoder().encodeToString(encryptedData), key);
+                    String decryptedFileName = newBook.getIsbn() + "_decrypted" + fileExtension;
+                    FileUploadUtil.saveFile(uploadLocation, decryptedFileName, decryptedData, "documents");
+                } catch (Exception e) {
+                    errors.put("originalFile", "Error decrypting and saving original file");
+                }
             }
 
             if(!errors.isEmpty()) {
@@ -210,7 +188,6 @@ public class EbookExternalService {
         return ebookRepository.findAll();
     }
 
-    //? Transactional annotation is not needed here, but might be needed later on
     @Transactional
     public Boolean deleteBook(EbookExternal book, UserDetails userDetails) {
         if (book == null) {
@@ -257,10 +234,7 @@ public class EbookExternalService {
             MultipartFile coverImage
     ) {
         EbookExternal book = ebookRepository.findById(id).orElse(null);
-
-        HashMap<String, String> errors = new HashMap<String, String>();
-
-        // ? Setting the location where the files will be uploaded
+        HashMap<String, String> errors = new HashMap<>();
         String uploadLocation = "ebooks";
         String uploadLocationCover = "ebooks_covers";
 
@@ -274,8 +248,6 @@ public class EbookExternalService {
             return null;
         }
 
-        // TODO validate the book details before updating
-
         if (book.getId() != null && ebook.getId() == null) {
             ebook.setId(book.getId());
         }
@@ -285,19 +257,25 @@ public class EbookExternalService {
         if (book.getIsbn() != null && ebook.getIsbn() == null) {
             ebook.setIsbn(book.getIsbn());
         }
+        if (book.getGenres() != null && ebook.getGenres() == null) {
+            ebook.setGenres(book.getGenres());
+        }
+        if (book.getTags() != null && ebook.getTags() == null) {
+            ebook.setTags(book.getTags());
+        }
+        if (book.getDescription() != null && ebook.getDescription() == null) {
+            ebook.setDescription(book.getDescription());
+        }
         if (book.getAuthor() != null) {
             ebook.setAuthor(book.getAuthor());
         }
 
         if (demoFile != null) {
-
-            //? Deleting the previously stored file
             if(book.getDemo_loc() != null) {
                 File file = new File("public" + book.getDemo_loc());
                 if(file.exists()) file.delete();
             }
 
-            //? Uploading the new file
             String originalFileName = StringUtils.cleanPath(Objects.requireNonNull(demoFile.getOriginalFilename()));
             String fileExtension = FileUploadUtil.getFileExtension(originalFileName);
 
@@ -305,10 +283,8 @@ public class EbookExternalService {
                 errors.put("demoFile", "Invalid file extension");
             }
 
-            //? Create a new file name with the custom prefix and the original extension
             String customFileName = book.getIsbn() + "_demo" + fileExtension;
 
-            // ? Saving the files on the storage
             try {
                 FileUploadUtil.saveFile(uploadLocation, customFileName, demoFile, "documents");
                 ebook.setDemo_loc("/documents/" + uploadLocation + "/" + customFileName);
@@ -320,13 +296,11 @@ public class EbookExternalService {
         }
 
         if (originalFile != null) {
-            //? Deleting the previously stored file
             if(book.getOriginal_loc() != null) {
                 File file = new File("public" + book.getOriginal_loc());
                 if(file.exists()) file.delete();
             }
 
-            //? Uploading the new file
             String originalFileName = StringUtils.cleanPath(Objects.requireNonNull(originalFile.getOriginalFilename()));
             String fileExtension = FileUploadUtil.getFileExtension(originalFileName);
 
@@ -334,10 +308,8 @@ public class EbookExternalService {
                 errors.put("originalFile", "Invalid file extension");
             }
 
-            //? Create a new file name with the custom prefix and the original extension
             String customFileName = book.getIsbn() + "_original" + fileExtension;
 
-            // ? Saving the files on the storage
             try {
                 FileUploadUtil.saveFile(uploadLocation, customFileName, originalFile, "documents");
                 ebook.setOriginal_loc("/documents/" + uploadLocation + "/" + customFileName);
@@ -349,13 +321,11 @@ public class EbookExternalService {
         }
 
         if (coverImage != null) {
-            //? Deleting the previously stored file
             if(book.getCover_image() != null) {
                 File file = new File("public" + book.getCover_image());
                 if(file.exists()) file.delete();
             }
 
-            //? Uploading the new file
             String originalFileName = StringUtils.cleanPath(Objects.requireNonNull(coverImage.getOriginalFilename()));
             String fileExtension = FileUploadUtil.getFileExtension(originalFileName);
 
@@ -363,10 +333,8 @@ public class EbookExternalService {
                 errors.put("coverImage", "Invalid file extension");
             }
 
-            //? Create a new file name with the custom prefix and the original extension
             String customFileName = book.getIsbn() + "_cover" + fileExtension;
 
-            // ? Saving the files on the storage
             try {
                 FileUploadUtil.saveFile(uploadLocationCover, customFileName, coverImage);
                 ebook.setCover_image("/images/" + uploadLocation + "/" + customFileName);
@@ -391,11 +359,9 @@ public class EbookExternalService {
         }
 
         if(book.getAuthor().getId().equals(user.getId())) {
-
             if(!errors.isEmpty()) {
                 return null;
             }
-
             return ebookRepository.save(ebook);
         }
 
