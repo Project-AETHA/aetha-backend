@@ -5,7 +5,6 @@ import com.nighthawk.aetha_backend.dto.ResponseDTO;
 import com.nighthawk.aetha_backend.entity.EbookExternal;
 import com.nighthawk.aetha_backend.service.EbookExternalService;
 import com.nighthawk.aetha_backend.utils.VarList;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,9 +27,9 @@ public class EbookExternalController {
     @PostMapping("/publish")
     public ResponseEntity<ResponseDTO> publishEbook(
             @ModelAttribute RequestDTO ebook,
-            @RequestPart(value = "demoFile") MultipartFile demoFile,
-            @RequestPart(value = "originalFile") MultipartFile originalFile,
-            @RequestPart(value = "coverImage") MultipartFile coverImage,
+            @RequestPart(value = "demoFile", required = false) MultipartFile demoFile,
+            @RequestPart(value = "originalFile", required = false) MultipartFile originalFile,
+            @RequestPart(value = "coverImage", required = false) MultipartFile coverImage,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
         return new ResponseEntity<>(service.publishEbook(ebook, demoFile, originalFile, coverImage, userDetails), HttpStatus.OK);

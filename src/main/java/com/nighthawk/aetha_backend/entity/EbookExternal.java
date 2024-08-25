@@ -20,7 +20,8 @@ public class EbookExternal {
     private String description;
     private String isbn;
     private List<Genres> genres;
-    private List<String> tags;
+    private List<Tags> tags;
+    private List<String> custom_tags;
 
     @DocumentReference(collection = "users")
     @Indexed

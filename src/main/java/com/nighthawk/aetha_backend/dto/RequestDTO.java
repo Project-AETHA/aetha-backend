@@ -1,6 +1,5 @@
 package com.nighthawk.aetha_backend.dto;
 
-import com.nighthawk.aetha_backend.entity.Genres;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 public class RequestDTO {
     private String title;
-    private List<Genres> genres;
+    private List<String> genres;
     private String description;
     private UserDetails userDetails;
     private String id;
@@ -20,8 +19,11 @@ public class RequestDTO {
     private String email;
     private String price;
     private List<String> tags;
-    private List<String> customTags;
+    private List<String> custom_tags;
     private Integer sold_amount;
     private Date createdAt;
     private Date updatedAt;
+
+    // ? Specific to Content
+    private Date manual_release_date;
 }

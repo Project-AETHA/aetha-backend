@@ -1,10 +1,11 @@
 package com.nighthawk.aetha_backend.service;
 
-import com.nighthawk.aetha_backend.dto.EbookFeedbackDTO;
 import com.nighthawk.aetha_backend.dto.RequestDTO;
 import com.nighthawk.aetha_backend.dto.ResponseDTO;
 import com.nighthawk.aetha_backend.entity.AuthUser;
 import com.nighthawk.aetha_backend.entity.EbookExternal;
+import com.nighthawk.aetha_backend.entity.Genres;
+import com.nighthawk.aetha_backend.entity.Tags;
 import com.nighthawk.aetha_backend.repository.AuthUserRepository;
 import com.nighthawk.aetha_backend.repository.EbookExternalRepository;
 import com.nighthawk.aetha_backend.utils.EncryptionUtil;
@@ -24,6 +25,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 public class EbookExternalService {
@@ -69,8 +71,55 @@ public class EbookExternalService {
             newBook.setCreatedAt(new Date());
             newBook.setTitle(ebook.getTitle());
             newBook.setDescription(ebook.getDescription());
-            newBook.setGenres(ebook.getGenres());
-            newBook.setTags(ebook.getTags());
+
+            if(ebook.getTitle() == null) {
+                errors.put("title", "Title cannot be empty");
+            }
+
+
+            // * Mapping genre strings to enum
+            if(ebook.getGenres() != null) {
+                List<Genres> genreList = new ArrayList<>();
+                for (String genreString : ebook.getGenres()) {
+                    String trimmedGenre = genreString.trim().toUpperCase();
+                    try {
+                        Genres genre = Genres.valueOf(trimmedGenre);
+                        genreList.add(genre);
+                    } catch (IllegalArgumentException e) {
+                        errors.put("genres", "Invalid genre: " + trimmedGenre);
+                    }
+                }
+                newBook.setGenres(genreList);
+            } else {
+                errors.put("genres", "Genres cannot be empty");
+            }
+
+
+            // * Mapping tags strings to Tags enum
+            if(ebook.getTags() != null) {
+                List<Tags> tagsList = new ArrayList<>();
+                for (String tagString : ebook.getTags()) {
+                    String trimmedTag = tagString.trim().toUpperCase();
+                    try {
+                        Tags tag = Tags.valueOf(trimmedTag);
+                        tagsList.add(tag);
+                    } catch (IllegalArgumentException e) {
+                        errors.put("tags", "Invalid tag: " + trimmedTag);
+                    }
+                }
+                newBook.setTags(tagsList);
+            } else {
+                errors.put("tags", "Empty tags");
+            }
+
+            // Convert custom_tags to uppercase
+            if(ebook.getCustom_tags() != null) {
+                List<String> customTagsUpper = ebook.getCustom_tags().stream()
+                        .map(String::toUpperCase)
+                        .collect(Collectors.toList());
+                newBook.setCustom_tags(customTagsUpper);
+            }
+
             newBook.setSold_amount(0);
             newBook.setPrice(Double.valueOf(ebook.getPrice()));
 

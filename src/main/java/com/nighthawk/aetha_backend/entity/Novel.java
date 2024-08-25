@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.DocumentReference;
 
+import java.util.Date;
 import java.util.List;
 
 @Builder
@@ -22,16 +23,20 @@ public class Novel {
     private AuthUser author;
 
     @Indexed
-    private String name;
+    private String title;
 
-    private String image;
+    private String synopsis;
+    private String description;
+    private String cover_image;
 
-    private String genre;
+    private List<Genres> genre;
+    private List<String> tags;
+    private List<String> custom_tags;
+
+    // ? Not sure of the content
+    private List<String> content_warning;
+
+    private Date manual_release_date;
 
     private List<Review> reviews;
-
-    private String description;
-
-    private String isbn;
-
 }
