@@ -124,7 +124,7 @@ public class EbookExternalService {
             newBook.setPrice(Double.valueOf(ebook.getPrice()));
 
             if (!isValidISBN(ebook.getIsbn())) {
-                errors.put("isbn", "Invalid ISBN format");
+                errors.put("isbn", "Invalid ISBN format Eg: 978-123-1234-12-1");
             } else {
                 newBook.setIsbn(ebook.getIsbn());
             }
@@ -221,9 +221,10 @@ public class EbookExternalService {
             responseDTO.setContent(ebookRepository.save(newBook));
 
         } catch (Exception e) {
-            responseDTO.setCode(VarList.RSP_ERROR);
+            responseDTO.setCode(VarList.RSP_VALIDATION_FAILED);
             responseDTO.setMessage(e.getMessage());
             responseDTO.setErrors(errors);
+            responseDTO.setContent(null);
         }
 
         return responseDTO;
