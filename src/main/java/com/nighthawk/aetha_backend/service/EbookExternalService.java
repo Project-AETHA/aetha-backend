@@ -1,9 +1,10 @@
 package com.nighthawk.aetha_backend.service;
 
+import com.nighthawk.aetha_backend.dto.EbookExternalDTO;
 import com.nighthawk.aetha_backend.dto.RequestDTO;
 import com.nighthawk.aetha_backend.dto.ResponseDTO;
 import com.nighthawk.aetha_backend.entity.AuthUser;
-import com.nighthawk.aetha_backend.entity.EbookExternal;
+import com.nighthawk.aetha_backend.entity.ebook.EbookExternal;
 import com.nighthawk.aetha_backend.entity.Genres;
 import com.nighthawk.aetha_backend.entity.Tags;
 import com.nighthawk.aetha_backend.repository.AuthUserRepository;
@@ -11,8 +12,10 @@ import com.nighthawk.aetha_backend.repository.EbookExternalRepository;
 import com.nighthawk.aetha_backend.utils.EncryptionUtil;
 import com.nighthawk.aetha_backend.utils.FileUploadUtil;
 import com.nighthawk.aetha_backend.utils.VarList;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +36,11 @@ public class EbookExternalService {
     @Autowired
     private EbookExternalRepository ebookRepository;
 
-    private final ResponseDTO responseDTO = new ResponseDTO();
+    @Autowired
+    private ResponseDTO responseDTO;
+
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Autowired
     private AuthUserRepository userRepository;
@@ -234,8 +241,30 @@ public class EbookExternalService {
         return ebookRepository.findById(id).orElse(null);
     }
 
-    public List<EbookExternal> findAllBooks() {
-        return ebookRepository.findAll();
+    public List<EbookExternalDTO> findAllBooks() {
+
+        List<EbookExternal> ebooks = ebookRepository.findAll();
+
+        // ! TODO - Unknown Content
+        return ebooks.stream()
+                .map(ebook -> modelMapper.typeMap(EbookExternal.class, EbookExternalDTO.class)
+                        .addMappings(mapper -> mapper.map(src -> src.getAuthor().getDisplayName(), EbookExternalDTO::setAuthor))
+                        .map(ebook))
+                .collect(Collectors.toList());
+    }
+
+    public List<EbookExternalDTO> findAllBooksSorted(String field, String order) {
+
+        List<EbookExternal> ebooks = Objects.equals(order, "ASC")
+                ? ebookRepository.findAll(Sort.by(Sort.Direction.ASC, field))
+                : ebookRepository.findAll(Sort.by(Sort.Direction.DESC, field));
+
+        // ! TODO - Unknown Content
+        return ebooks.stream()
+                .map(ebook -> modelMapper.typeMap(EbookExternal.class, EbookExternalDTO.class)
+                        .addMappings(mapper -> mapper.map(src -> src.getAuthor().getDisplayName(), EbookExternalDTO::setAuthor))
+                        .map(ebook))
+                .collect(Collectors.toList());
     }
 
     @Transactional

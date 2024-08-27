@@ -1,6 +1,9 @@
-package com.nighthawk.aetha_backend.entity;
+package com.nighthawk.aetha_backend.entity.ebook;
 
 import com.nighthawk.aetha_backend.dto.EbookFeedbackDTO;
+import com.nighthawk.aetha_backend.entity.AuthUser;
+import com.nighthawk.aetha_backend.entity.Genres;
+import com.nighthawk.aetha_backend.entity.Tags;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -25,7 +28,7 @@ public class EbookExternal {
 
     @DocumentReference(collection = "users")
     @Indexed
-    private AuthUser author;
+    private AuthUser author; //? In the EbookExternal, only the displayName of the user is sent
 
     private String cover_image;
     private String demo_loc;
@@ -33,6 +36,12 @@ public class EbookExternal {
     private Date createdAt;
     private Double price;
     private Integer sold_amount = 0;
-    private List<EbookFeedbackDTO> feedback;
+    private List<EbookReviews> reviews;
+
+    // ? Overall rating of all the current reviews and total of all the views
+    private Integer rating;
+    private Integer views;
+
+    private List<EbookFeedbackDTO> feedback; //? This won't be included in the EBookExternalDTO
 
 }

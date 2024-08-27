@@ -2,7 +2,7 @@ package com.nighthawk.aetha_backend.controller;
 
 import com.nighthawk.aetha_backend.dto.RequestDTO;
 import com.nighthawk.aetha_backend.dto.ResponseDTO;
-import com.nighthawk.aetha_backend.entity.EbookExternal;
+import com.nighthawk.aetha_backend.entity.ebook.EbookExternal;
 import com.nighthawk.aetha_backend.service.EbookExternalService;
 import com.nighthawk.aetha_backend.utils.VarList;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +58,15 @@ public class EbookExternalController {
         responseDTO.setCode(VarList.RSP_SUCCESS);
         responseDTO.setMessage("All books");
         responseDTO.setContent(service.findAllBooks());
+
+        return new ResponseEntity<>(responseDTO, HttpStatus.OK);
+    }
+
+    @GetMapping("/all/{field}/{order}")
+    public ResponseEntity<ResponseDTO> getAllBooksSorted(@PathVariable String field, @PathVariable String order) {
+        responseDTO.setCode(VarList.RSP_SUCCESS);
+        responseDTO.setMessage("All books");
+        responseDTO.setContent(service.findAllBooksSorted(field, order));
 
         return new ResponseEntity<>(responseDTO, HttpStatus.OK);
     }
