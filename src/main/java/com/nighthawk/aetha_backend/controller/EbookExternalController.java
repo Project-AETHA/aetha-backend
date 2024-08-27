@@ -1,16 +1,17 @@
 package com.nighthawk.aetha_backend.controller;
 
+import com.nighthawk.aetha_backend.dto.RequestDTO;
 import com.nighthawk.aetha_backend.dto.ResponseDTO;
-import com.nighthawk.aetha_backend.entity.EbookExternal;
+import com.nighthawk.aetha_backend.entity.ebook.EbookExternal;
 import com.nighthawk.aetha_backend.service.EbookExternalService;
 import com.nighthawk.aetha_backend.utils.VarList;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @CrossOrigin
@@ -25,22 +26,13 @@ public class EbookExternalController {
 
     @PostMapping("/publish")
     public ResponseEntity<ResponseDTO> publishEbook(
-            @RequestBody EbookExternal ebook,
+            @ModelAttribute RequestDTO ebook,
+            @RequestPart(value = "demoFile", required = false) MultipartFile demoFile,
+            @RequestPart(value = "originalFile", required = false) MultipartFile originalFile,
+            @RequestPart(value = "coverImage", required = false) MultipartFile coverImage,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-
-        EbookExternal savedBook = service.publishEbook(ebook, userDetails);
-
-        if(savedBook == null) {
-            responseDTO.setCode(VarList.RSP_FAIL);
-            responseDTO.setMessage("Failed to publish ebook");
-        } else {
-            responseDTO.setCode(VarList.RSP_SUCCESS);
-            responseDTO.setMessage("Ebook published successfully");
-            responseDTO.setContent(ebook);
-        }
-
-        return new ResponseEntity<>(responseDTO, HttpStatus.OK);
+        return new ResponseEntity<>(service.publishEbook(ebook, demoFile, originalFile, coverImage, userDetails), HttpStatus.OK);
     }
 
 
@@ -66,6 +58,15 @@ public class EbookExternalController {
         responseDTO.setCode(VarList.RSP_SUCCESS);
         responseDTO.setMessage("All books");
         responseDTO.setContent(service.findAllBooks());
+
+        return new ResponseEntity<>(responseDTO, HttpStatus.OK);
+    }
+
+    @GetMapping("/all/{field}/{order}")
+    public ResponseEntity<ResponseDTO> getAllBooksSorted(@PathVariable String field, @PathVariable String order) {
+        responseDTO.setCode(VarList.RSP_SUCCESS);
+        responseDTO.setMessage("All books");
+        responseDTO.setContent(service.findAllBooksSorted(field, order));
 
         return new ResponseEntity<>(responseDTO, HttpStatus.OK);
     }
@@ -103,7 +104,10 @@ public class EbookExternalController {
     // ? Can only be updated by the author
     @PutMapping("/{id}")
     public ResponseEntity<ResponseDTO> updateBook(
-            @RequestBody EbookExternal ebook,
+            @ModelAttribute EbookExternal ebook,
+            @RequestPart(value = "demoFile", required = false) MultipartFile demoFile,
+            @RequestPart(value = "originalFile", required = false) MultipartFile originalFile,
+            @RequestPart(value = "coverImage", required = false) MultipartFile coverImage,
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable String id
     ){
@@ -113,7 +117,7 @@ public class EbookExternalController {
             responseDTO.setCode(VarList.RSP_FAIL);
             responseDTO.setMessage("Book not found");
         } else {
-            EbookExternal updatedEbook = service.updateBook(id, ebook, userDetails);
+            EbookExternal updatedEbook = service.updateBook(id, ebook, userDetails, demoFile, originalFile, coverImage);
 
             if (updatedEbook != null) {
                 responseDTO.setCode(VarList.RSP_SUCCESS);
