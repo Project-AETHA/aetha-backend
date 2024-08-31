@@ -62,6 +62,11 @@ public class EbookExternalController {
         return new ResponseEntity<>(responseDTO, HttpStatus.OK);
     }
 
+    @GetMapping("/my-all")
+    public ResponseEntity<ResponseDTO> getMyBooks(@AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(service.findMyBooks(userDetails));
+    }
+
     @GetMapping("/all/{field}/{order}")
     public ResponseEntity<ResponseDTO> getAllBooksSorted(@PathVariable String field, @PathVariable String order) {
         responseDTO.setCode(VarList.RSP_SUCCESS);
