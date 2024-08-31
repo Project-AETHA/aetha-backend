@@ -12,6 +12,7 @@ import com.nighthawk.aetha_backend.repository.EbookExternalRepository;
 import com.nighthawk.aetha_backend.utils.EncryptionUtil;
 import com.nighthawk.aetha_backend.utils.FileUploadUtil;
 import com.nighthawk.aetha_backend.utils.VarList;
+import com.nighthawk.aetha_backend.utils.predefined.ContentStatus;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -129,6 +130,7 @@ public class EbookExternalService {
 
             newBook.setSold_amount(0);
             newBook.setPrice(Double.valueOf(ebook.getPrice()));
+            newBook.setStatus(ContentStatus.PENDING);
 
             if (!isValidISBN(ebook.getIsbn())) {
                 errors.put("isbn", "Invalid ISBN format Eg: 978-123-1234-12-1");
@@ -251,6 +253,39 @@ public class EbookExternalService {
                         .addMappings(mapper -> mapper.map(src -> src.getAuthor().getDisplayName(), EbookExternalDTO::setAuthor))
                         .map(ebook))
                 .collect(Collectors.toList());
+    }
+
+    public ResponseDTO findMyBooks(UserDetails userDetails) {
+        AuthUser user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
+
+        if(user == null) {
+            responseDTO.setCode(VarList.RSP_TOKEN_INVALID);
+            responseDTO.setMessage("User not found");
+            responseDTO.setContent(null);
+        } else {
+            try {
+                List<EbookExternal> ebooks = ebookRepository.findByAuthor(user);
+
+                List<EbookExternalDTO> myEbooks = ebooks.stream()
+                        .map(ebook -> modelMapper.typeMap(EbookExternal.class, EbookExternalDTO.class)
+                                .addMappings(mapper -> mapper.map(src -> src.getAuthor().getDisplayName(), EbookExternalDTO::setAuthor))
+                                .map(ebook))
+                        .toList();
+
+                responseDTO.setCode(VarList.RSP_SUCCESS);
+                responseDTO.setContent(myEbooks);
+
+                if(myEbooks.isEmpty()) responseDTO.setMessage("No books found");
+                else responseDTO.setMessage("Books found");
+
+            } catch (Exception e) {
+                responseDTO.setCode(VarList.RSP_FAIL);
+                responseDTO.setMessage("Error fetching books");
+                responseDTO.setContent(null);
+            }
+        }
+
+        return responseDTO;
     }
 
     public List<EbookExternalDTO> findAllBooksSorted(String field, String order) {
@@ -435,6 +470,10 @@ public class EbookExternalService {
         }
         if (book.getFeedback() != null) {
             ebook.setFeedback(book.getFeedback());
+        }
+
+        if (book.getStatus() != null) {
+            ebook.setStatus(book.getStatus());
         }
 
         if(book.getAuthor().getId().equals(user.getId())) {
