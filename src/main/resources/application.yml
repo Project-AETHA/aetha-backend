@@ -23,3 +23,7 @@ spring:
 env:
   uploads:
     secret_key: "nVDjQCU0qiMFuyCa8lWMKKun4q5hciGjhkZrfezu5TI="
+  imagekit:
+    publicKey: "public_GCupctCpbthLRh/wP6eCY7dc0fE="
+    privateKey: "private_jFKJDFznJQYotWykfHBJi5RuRyw="
+    urlEndpoint: "https://ik.imagekit.io/aetha"

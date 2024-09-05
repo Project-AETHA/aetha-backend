@@ -67,11 +67,14 @@ public class EbookExternalController {
         return ResponseEntity.ok(service.findMyBooks(userDetails));
     }
 
-    @GetMapping("/all/{field}/{order}")
-    public ResponseEntity<ResponseDTO> getAllBooksSorted(@PathVariable String field, @PathVariable String order) {
+    @PostMapping("/search")
+    public ResponseEntity<ResponseDTO> getAllBooksSorted(@RequestBody RequestDTO requestDTO) {
+        System.out.println("Ran");
+        requestDTO.setSearchTerm("dark");
+
         responseDTO.setCode(VarList.RSP_SUCCESS);
-        responseDTO.setMessage("All books");
-        responseDTO.setContent(service.findAllBooksSorted(field, order));
+        responseDTO.setMessage("Search results");
+        responseDTO.setContent(service.filterEbooks(requestDTO));
 
         return new ResponseEntity<>(responseDTO, HttpStatus.OK);
     }
