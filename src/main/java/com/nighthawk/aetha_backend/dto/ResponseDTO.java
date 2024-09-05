@@ -13,4 +13,7 @@ public class ResponseDTO {
     private String code;
     private String message;
     private Object content;
+
+    // Contains a list of errors
+    private Object errors;
 }

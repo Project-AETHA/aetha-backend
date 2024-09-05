@@ -2,12 +2,10 @@ package com.nighthawk.aetha_backend.controller;
 
 import com.nighthawk.aetha_backend.dto.ResponseDTO;
 import com.nighthawk.aetha_backend.entity.AuthUser;
-import com.nighthawk.aetha_backend.entity.Blog;
 import com.nighthawk.aetha_backend.entity.Book;
 import com.nighthawk.aetha_backend.repository.BookRepository;
 import com.nighthawk.aetha_backend.service.UserService;
 import com.nighthawk.aetha_backend.utils.VarList;
-import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
