@@ -9,6 +9,7 @@ import com.nighthawk.aetha_backend.entity.Genres;
 import com.nighthawk.aetha_backend.entity.Tags;
 import com.nighthawk.aetha_backend.repository.AuthUserRepository;
 import com.nighthawk.aetha_backend.repository.EbookExternalRepository;
+import com.nighthawk.aetha_backend.repository.SearchRepository;
 import com.nighthawk.aetha_backend.utils.EncryptionUtil;
 import com.nighthawk.aetha_backend.utils.FileUploadUtil;
 import com.nighthawk.aetha_backend.utils.VarList;
@@ -16,10 +17,6 @@ import com.nighthawk.aetha_backend.utils.predefined.ContentStatus;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,7 +47,7 @@ public class EbookExternalService {
     private AuthUserRepository userRepository;
 
     @Autowired
-    private MongoTemplate mongoTemplate;
+    private SearchRepository searchRepository;
 
     private static final String ISBN_PATTERN = "978-\\d{3}-\\d{4}-\\d{2}-\\d{1}";
 
@@ -294,26 +291,14 @@ public class EbookExternalService {
         return responseDTO;
     }
 
-    public List<EbookExternal> filterEbooks(RequestDTO requestDTO) {
-        Query query = new Query();
-
-        // Add criteria for search term in the title
-        if (requestDTO.getSearchTerm() != null && !requestDTO.getSearchTerm().isEmpty()) {
-            query.addCriteria(Criteria.where("title").regex(requestDTO.getSearchTerm(), "i"));
-        }
-
-        // Add criteria for genres
-        if (requestDTO.getGenres() != null && !requestDTO.getGenres().isEmpty()) {
-            query.addCriteria(Criteria.where("genre").in(requestDTO.getGenres()));
-        }
-
-        // Add criteria for rating
-        if (requestDTO.getRating() != null) {
-            query.addCriteria(Criteria.where("rating").gte(requestDTO.getRating()));
-        }
+    public List<EbookExternalDTO> filterEbooks(RequestDTO requestDTO) {
 
         // Execute the query
-        return mongoTemplate.find(query, EbookExternal.class);
+        return searchRepository.searchEbooks(
+                requestDTO.getSearchTerm(),
+                requestDTO.getGenres(),
+                requestDTO.getRating()
+        );
     }
 
     @Transactional

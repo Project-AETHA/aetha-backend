@@ -43,8 +43,8 @@ public class SecurityConfig {
                                     "/v3/api-docs/**",
                                     "/api/files/**",
                                     "/api/books",
-                                    "/api/ebooks**", // TODO : Check this line
-                                    "/api/config**"
+                                    "/api/ebooks/**", // TODO : Check this line
+                                    "/api/config/**"
                             )
                             .permitAll()
                             .anyRequest().authenticated()

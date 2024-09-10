@@ -69,9 +69,6 @@ public class EbookExternalController {
 
     @PostMapping("/search")
     public ResponseEntity<ResponseDTO> getAllBooksSorted(@RequestBody RequestDTO requestDTO) {
-        System.out.println("Ran");
-        requestDTO.setSearchTerm("dark");
-
         responseDTO.setCode(VarList.RSP_SUCCESS);
         responseDTO.setMessage("Search results");
         responseDTO.setContent(service.filterEbooks(requestDTO));
