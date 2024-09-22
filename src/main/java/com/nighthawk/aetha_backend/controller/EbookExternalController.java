@@ -8,6 +8,8 @@ import com.nighthawk.aetha_backend.utils.VarList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +26,10 @@ public class EbookExternalController {
     @Autowired
     private EbookExternalService service;
 
+    //? Instantiating KafkaTemplate
+    @Autowired
+    KafkaTemplate<String, String> kafkaTemplate;
+
     @PostMapping("/publish")
     public ResponseEntity<ResponseDTO> publishEbook(
             @ModelAttribute RequestDTO ebook,
@@ -35,6 +41,19 @@ public class EbookExternalController {
         return new ResponseEntity<>(service.publishEbook(ebook, demoFile, originalFile, coverImage, userDetails), HttpStatus.OK);
     }
 
+    //? Publishing content to a topic
+    @GetMapping("/testing")
+    public String testing() {
+        kafkaTemplate.send("new-topic", "Hello from Ebook Service");
+        return "Ebook Service is up and running";
+    }
+
+    //? Listening to a topic
+    //? Should be moved to a separate file
+    @KafkaListener(topics = "new-topic")
+    public void handleNotification() {
+        System.out.println("Received notification");
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<ResponseDTO> getBookById(@PathVariable String id) {

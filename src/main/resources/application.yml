@@ -19,6 +19,50 @@ spring:
       enabled: true
       max-file-size: 10MB
       max-request-size: 10MB
+  # Mailing configurations
+  mail:
+    host: smtp-relay.brevo.com
+    port: 587
+    username: 7c6602001@smtp-brevo.com
+    password: jFJWERsUHOQVgb3a
+    properties:
+      mail:
+        smtp:
+          auth: true
+        starttls:
+          enable: true
+          required: true
+  # Kafka configurations
+  kafka:
+    bootstrap-servers: localhost:9092
+    template:
+      default-topic: new-topic
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+#      properties:
+#        spring:
+#          json:
+#            type:
+#              mapping: notification:com.nighthawk.aetha_backend.dto.NotificationDTO
+    consumer:
+      group-id: my-group-id
+      key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      properties:
+        spring:
+          deserializer:
+            key:
+              delegate:
+                class: org.apache.kafka.common.serialization.StringDeserializer
+            value:
+              delegate:
+                class: org.springframework.kafka.support.serializer.JsonDeserializer
+          json:
+#            type:
+#              mapping: notification:com.chathuralakshan.recruitease.notificationservice.dto.NotificationEvent
+            trusted:
+              packages: "*"
 
 env:
   uploads:
