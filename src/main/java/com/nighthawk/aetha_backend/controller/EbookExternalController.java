@@ -1,9 +1,11 @@
 package com.nighthawk.aetha_backend.controller;
 
+import com.nighthawk.aetha_backend.dto.MailDTO;
 import com.nighthawk.aetha_backend.dto.RequestDTO;
 import com.nighthawk.aetha_backend.dto.ResponseDTO;
 import com.nighthawk.aetha_backend.entity.ebook.EbookExternal;
 import com.nighthawk.aetha_backend.service.EbookExternalService;
+import com.nighthawk.aetha_backend.service.MailService;
 import com.nighthawk.aetha_backend.utils.VarList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,6 +32,10 @@ public class EbookExternalController {
     @Autowired
     KafkaTemplate<String, String> kafkaTemplate;
 
+    //! Temp - Mail service instance
+    @Autowired
+    MailService mailService;
+
     @PostMapping("/publish")
     public ResponseEntity<ResponseDTO> publishEbook(
             @ModelAttribute RequestDTO ebook,
@@ -53,6 +59,13 @@ public class EbookExternalController {
     @KafkaListener(topics = "new-topic")
     public void handleNotification() {
         System.out.println("Received notification");
+
+        MailDTO mail = new MailDTO();
+        mail.setTo("nipunbathiya1256@gmail.com");
+        mail.setSubject("Aetha - Testing");
+        mail.setMessage("Testing mailing service from brevo and the kafka pub/sub architecture");
+
+        mailService.sendMail(mail);
     }
 
     @GetMapping("/{id}")

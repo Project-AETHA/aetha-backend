@@ -71,3 +71,14 @@ env:
     publicKey: "public_GCupctCpbthLRh/wP6eCY7dc0fE="
     privateKey: "private_jFKJDFznJQYotWykfHBJi5RuRyw="
     urlEndpoint: "https://ik.imagekit.io/aetha"
+
+logging:
+  file:
+    name: logs/aetha_backend.log
+  logback:
+    rollingpolicy:
+      file-name-pattern: "logs/aetha_backend.%d{yyyy-MM-dd}.%i.log"
+      max-file-size: 10MB
+      total-size-cap: 100MB
+      max-history: 7
+      clean-history-on-start: true
