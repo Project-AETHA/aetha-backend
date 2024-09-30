@@ -1,10 +1,16 @@
 package com.nighthawk.aetha_backend.controller;
 
+import com.nighthawk.aetha_backend.dto.NotificationDTO;
+import com.nighthawk.aetha_backend.dto.ResponseDTO;
+import com.nighthawk.aetha_backend.entity.Notification;
+import com.nighthawk.aetha_backend.service.NotificationService;
+import com.nighthawk.aetha_backend.utils.predefined.NotifyType;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -17,18 +23,31 @@ public class NotificationController {
 
     private static final Logger logger = Logger.getLogger(NotificationController.class.getName());
 
+    @Autowired
+    private NotificationService notificationService;
+
     @PostMapping("/create")
-    public boolean createNotification() {
+    public boolean createNotification(@AuthenticationPrincipal UserDetails userDetails) {
         try {
             log.info("Creating a notification");
             System.out.println("Creating a notification");
             //? Create a notification
 
-            logger.log(Level.SEVERE, "error log");
-            logger.log(Level.WARNING, "warning log");
-            logger.log(Level.INFO, "info log");
-            logger.log(Level.FINE, "debug log");
-            logger.log(Level.FINER, "trace log");
+            NotificationDTO notification = new NotificationDTO();
+            notification.setType(NotifyType.PUSH_NOTIFICATION);
+            notification.setSubject("New Notification");
+            notification.setMessage("This is a new notification");
+            notification.setSeen(false);
+            notification.setLink("https://www.google.com");
+            notification.setRecipient(userDetails.getUsername());
+
+            notificationService.createNotification(notification);
+
+//            logger.log(Level.SEVERE, "error log");
+//            logger.log(Level.WARNING, "warning log");
+//            logger.log(Level.INFO, "info log");
+//            logger.log(Level.FINE, "debug log");
+//            logger.log(Level.FINER, "trace log");
 
 //            throw new Exception("Unimplemented Method");
             //?  On success returns true
@@ -38,6 +57,11 @@ public class NotificationController {
             System.out.println("Error creating a notification");
             return false;
         }
+    }
+
+    @GetMapping("/getAll")
+    public ResponseEntity<ResponseDTO> getMyNotifications(@AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(notificationService.getNotificationsForUser(userDetails.getUsername()));
     }
 
 }
