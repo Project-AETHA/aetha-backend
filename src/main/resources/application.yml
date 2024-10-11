@@ -11,6 +11,15 @@ spring:
     user:
       name: admin
       password: adminpassword
+  # OAuth 2.0 Configurations
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 611394632820-n4cgorcjr24q4s2nn3obic3hkpg4cn1l.apps.googleusercontent.com
+            client-secret: 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
+            scope: email, profile
+
   app:
     jwtSecret: 1a8a5fc2bae92e78ca36dc26642c6f8fa69af0683542bc365552284baf251fccs
     jwtExpiration: 86400000 # 24 hours
@@ -19,6 +28,50 @@ spring:
       enabled: true
       max-file-size: 10MB
       max-request-size: 10MB
+  # Mailing configurations
+  mail:
+    host: smtp-relay.brevo.com
+    port: 587
+    username: 7c6602001@smtp-brevo.com
+    password: jFJWERsUHOQVgb3a
+    properties:
+      mail:
+        smtp:
+          auth: true
+        starttls:
+          enable: true
+          required: true
+  # Kafka configurations
+  kafka:
+    bootstrap-servers: localhost:9092
+    template:
+      default-topic: new-topic
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+#      properties:
+#        spring:
+#          json:
+#            type:
+#              mapping: notification:com.nighthawk.aetha_backend.dto.NotificationDTO
+    consumer:
+      group-id: my-group-id
+      key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      properties:
+        spring:
+          deserializer:
+            key:
+              delegate:
+                class: org.apache.kafka.common.serialization.StringDeserializer
+            value:
+              delegate:
+                class: org.springframework.kafka.support.serializer.JsonDeserializer
+          json:
+#            type:
+#              mapping: notification:com.chathuralakshan.recruitease.notificationservice.dto.NotificationEvent
+            trusted:
+              packages: "*"
 
 env:
   uploads:
@@ -27,3 +80,14 @@ env:
     publicKey: "public_GCupctCpbthLRh/wP6eCY7dc0fE="
     privateKey: "private_jFKJDFznJQYotWykfHBJi5RuRyw="
     urlEndpoint: "https://ik.imagekit.io/aetha"
+
+logging:
+  file:
+    name: logs/aetha_backend.log
+  logback:
+    rollingpolicy:
+      file-name-pattern: "logs/aetha_backend.%d{yyyy-MM-dd}.%i.log"
+      max-file-size: 10MB
+      total-size-cap: 100MB
+      max-history: 7
+      clean-history-on-start: true
