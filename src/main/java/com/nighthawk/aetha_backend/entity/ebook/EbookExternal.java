@@ -40,7 +40,7 @@ public class EbookExternal {
     private List<EbookReviews> reviews;
 
     // ? Overall rating of all the current reviews and total of all the views
-    private Integer rating;
+    private Double rating;
     private Integer views;
 
     private List<EbookFeedbackDTO> feedback; //? This won't be included in the EBookExternalDTO
