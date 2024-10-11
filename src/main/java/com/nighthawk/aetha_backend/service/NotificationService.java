@@ -1,6 +1,5 @@
 package com.nighthawk.aetha_backend.service;
 
-import com.nighthawk.aetha_backend.controller.NotificationController;
 import com.nighthawk.aetha_backend.dto.NotificationDTO;
 import com.nighthawk.aetha_backend.dto.ResponseDTO;
 import com.nighthawk.aetha_backend.entity.AuthUser;
@@ -8,8 +7,8 @@ import com.nighthawk.aetha_backend.entity.Notification;
 import com.nighthawk.aetha_backend.repository.AuthUserRepository;
 import com.nighthawk.aetha_backend.repository.NotificationRepository;
 import com.nighthawk.aetha_backend.utils.VarList;
-import com.nighthawk.aetha_backend.utils.predefined.NotifyType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,6 +20,8 @@ import java.util.logging.Logger;
 public class NotificationService {
 
     private static final Logger logger = Logger.getLogger(NotificationService.class.getName());
+
+//    private final KafkaTemplate<String, NotificationDTO> kafkaTemplate;
 
     @Autowired
     private NotificationRepository notificationRepository;
@@ -46,6 +47,24 @@ public class NotificationService {
             notificationRepository.save(newNotification);
 
             logger.log(Level.FINE, "Notification created successfully");
+
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error creating a notification - {}", e.getMessage());
+            return false;
+        }
+
+        return true;
+    }
+
+
+    public boolean createAnnouncement(NotificationDTO notification) {
+
+        try {
+
+            //? Creating a new notification using the previously built function
+            createNotification(notification);
+
+
 
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error creating a notification - {}", e.getMessage());
