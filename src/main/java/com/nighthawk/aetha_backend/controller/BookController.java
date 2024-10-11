@@ -3,9 +3,11 @@ package com.nighthawk.aetha_backend.controller;
 import com.nighthawk.aetha_backend.dto.ResponseDTO;
 import com.nighthawk.aetha_backend.entity.AuthUser;
 import com.nighthawk.aetha_backend.entity.Book;
+import com.nighthawk.aetha_backend.repository.AuthUserRepository;
 import com.nighthawk.aetha_backend.repository.BookRepository;
 import com.nighthawk.aetha_backend.service.UserService;
 import com.nighthawk.aetha_backend.utils.VarList;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,6 +27,10 @@ public class BookController {
 
     //? Temp
     private final BookRepository repository;
+
+    @Autowired
+    AuthUserRepository userRepository;
+
     private final UserService userService;
 
     public BookController(ResponseDTO responseDTO, BookRepository repository, UserService userService) {
@@ -59,7 +65,7 @@ public class BookController {
     ) {
 
         System.out.println("Authentic");
-        AuthUser user = userService.findByEmail(userDetails.getUsername());
+        AuthUser user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
 
         if(user != null) {
             try {

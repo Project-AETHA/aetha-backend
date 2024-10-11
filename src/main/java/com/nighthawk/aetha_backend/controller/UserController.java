@@ -26,108 +26,34 @@ public class UserController {
     @CrossOrigin
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/all-users")
-    public ResponseEntity<ResponseDTO> getAllUsers(@AuthenticationPrincipal UserDetails userDetails) {
-        try {
-
-            List<AuthUser> users = userService.getAllUsers();
-
-            System.out.println(userService.findByEmail(userDetails.getUsername()));
-
-            if(!users.isEmpty()) {
-                responseDTO.setCode(VarList.RSP_SUCCESS);
-                responseDTO.setMessage("Listing all users");
-                responseDTO.setContent(users);
-            } else {
-                responseDTO.setCode(VarList.RSP_FAIL);
-                responseDTO.setMessage("No users found");
-                responseDTO.setContent(null);
-            }
-            return new ResponseEntity<>(responseDTO, HttpStatus.OK);
-
-        } catch (Exception e) {
-            responseDTO.setCode(VarList.RSP_ERROR);
-            responseDTO.setMessage(e.getMessage());
-            responseDTO.setContent(null);
-            return new ResponseEntity<>(responseDTO, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    public ResponseEntity<ResponseDTO> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
     }
+
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{email}")
-    public ResponseEntity<ResponseDTO> findByEmail(@PathVariable String email) {
+    public ResponseEntity<ResponseDTO> findByEmail(@PathVariable String email){
 
-        try {
-            AuthUser user = userService.findByEmail(email);
-
-            if(user != null) {
-                responseDTO.setCode(VarList.RSP_SUCCESS);
-                responseDTO.setMessage("User found");
-                responseDTO.setContent(user);
-            } else {
-                responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
-                responseDTO.setMessage("User not found");
-                responseDTO.setContent(null);
-            }
-        } catch (Exception e) {
-            responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
-            responseDTO.setMessage("Server Error");
-            responseDTO.setContent(null);
-        }
-
-        return ResponseEntity.ok(responseDTO);
+        return ResponseEntity.ok(userService.findByEmail(email));
     }
+
 
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/update/{email}")
     public ResponseEntity<ResponseDTO> updateUsers(@PathVariable String email, @RequestBody AuthUser user) {
-        try {
 
-            AuthUser savedUser = userService.updateUser(email, user);
-
-            if(savedUser != null) {
-                responseDTO.setCode(VarList.RSP_SUCCESS);
-                responseDTO.setMessage("User found");
-                responseDTO.setContent(savedUser);
-            } else {
-                responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
-                responseDTO.setMessage("User not found");
-                responseDTO.setContent(null);
-            }
-
-        } catch (Exception e) {
-            responseDTO.setCode(VarList.RSP_FAIL);
-            responseDTO.setMessage("User saving failed");
-            responseDTO.setContent(null);
-        }
-
-        return ResponseEntity.ok(responseDTO);
+        return ResponseEntity.ok(userService.updateUser(email,user));
     }
 
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/delete/{email}")
-    public ResponseEntity<ResponseDTO> deleteUser(@PathVariable String email) {
-        try {
-            AuthUser deletedUser = userService.deleteUser(email);
+    public ResponseEntity<ResponseDTO> deleteUser   (@PathVariable String email) {
 
-            if(deletedUser != null) {
-                responseDTO.setCode(VarList.RSP_SUCCESS);
-                responseDTO.setMessage("User deleted successfully");
-                responseDTO.setContent(deletedUser);
-            } else {
-                responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
-                responseDTO.setMessage("User not found");
-                responseDTO.setContent(null);
-            }
 
-        } catch (Exception e) {
-            responseDTO.setCode(VarList.RSP_FAIL);
-            responseDTO.setMessage("User deletion failed");
-            responseDTO.setContent(null);
-        }
-
-        return ResponseEntity.ok(responseDTO);
+        return ResponseEntity.ok(userService.deleteUser(email));
     }
 
 }

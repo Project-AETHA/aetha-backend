@@ -1,16 +1,18 @@
 package com.nighthawk.aetha_backend.service;
 
 import com.nighthawk.aetha_backend.dto.ResponseDTO;
+import com.nighthawk.aetha_backend.dto.UserDTO;
 import com.nighthawk.aetha_backend.entity.AccStatus;
 import com.nighthawk.aetha_backend.entity.AuthUser;
 import com.nighthawk.aetha_backend.repository.AuthUserRepository;
 import com.nighthawk.aetha_backend.utils.VarList;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -22,20 +24,64 @@ public class UserService {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
+    ModelMapper modelMapper;
+
+    @Autowired
     private ResponseDTO responseDTO;
 
-    public List<AuthUser> getAllUsers() {
-        return repository.findAll();
+    public ResponseDTO getAllUsers() {
+
+        List<AuthUser> users = repository.findAll();
+
+        try {
+            if (!users.isEmpty()) {
+                responseDTO.setCode(VarList.RSP_SUCCESS);
+                responseDTO.setMessage("Listing all users");
+
+                List<UserDTO> authUsers = users.stream()
+                        .map(authUser -> modelMapper.map(authUser, UserDTO.class))
+                        .collect(Collectors.toList());
+
+                responseDTO.setContent(authUsers);
+
+            } else {
+                responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
+                responseDTO.setMessage("No users found");
+                responseDTO.setContent(null);
+
+            }
+        } catch (Exception e) {
+            responseDTO.setCode(VarList.RSP_ERROR);
+            responseDTO.setMessage(e.getMessage());
+            responseDTO.setContent(null);
+        }
+
+        return responseDTO;
     }
 
-    public AuthUser findByEmail(String email) {
+    public ResponseDTO findByEmail(String email) {
+        AuthUser user = repository.findByEmail(email).orElse(null);
 
-        Optional<AuthUser> user = repository.findByEmail(email);
+        try {
+            if (user == null) {
+                responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
+                responseDTO.setMessage("User not found");
+                responseDTO.setContent(null);
+            } else {
+                responseDTO.setMessage("User found");
+                responseDTO.setCode(VarList.RSP_SUCCESS);
+                responseDTO.setContent(user);
+            }
+        } catch (Exception e) {
 
-        return user.orElse(null);
+            responseDTO.setMessage(e.getMessage());
+            responseDTO.setCode(VarList.RSP_ERROR);
+            responseDTO.setContent(null);
+        }
+        return responseDTO;
     }
 
-    public AuthUser updateUser(String email, AuthUser newUser) {
+    public ResponseDTO updateUser(String email, AuthUser newUser) {
         AuthUser user = repository.findByEmail(email).orElse(null);
 
         if (user != null) {
@@ -64,10 +110,15 @@ public class UserService {
             // Update the display name with proper capitalization
             user.setDisplayName(capitalizeWords(user.getFirstname() + " " + user.getLastname()));
 
-            return repository.save(user);
+            responseDTO.setCode(VarList.RSP_SUCCESS);
+            responseDTO.setMessage("User updated successfully");
+            responseDTO.setContent(repository.save(user));
+        } else {
+            responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
+            responseDTO.setMessage("User not found to Update");
+            responseDTO.setContent(null);
         }
-
-        return null;
+        return responseDTO;
     }
 
     private String capitalizeWords(String str) {
@@ -85,16 +136,38 @@ public class UserService {
         return capitalizedStr.toString().trim();
     }
 
-    public AuthUser deleteUser(String email) {
+    public ResponseDTO deleteUser(String email) {
 
-        AuthUser user = repository.findByEmail(email).orElse(null);
+        try {
+            AuthUser user = repository.findByEmail(email).orElse(null);
 
-        if(user != null) {
-            user.setStatus(AccStatus.DELETED);
-            repository.save(user);
-            return user;
-        } else {
-            return null;
+            if(user != null) {
+                user.setStatus(AccStatus.DELETED);
+                AuthUser deletedUser = repository.save(user);
+
+                if( deletedUser != null ){
+                    responseDTO.setCode(VarList.RSP_SUCCESS);
+                    responseDTO.setMessage("User deleted Successfully");
+                    responseDTO.setContent(deletedUser);
+
+                } else {
+                    responseDTO.setCode(VarList.RSP_FAIL);
+                    responseDTO.setMessage("Failed to Delete");
+                    responseDTO.setContent(null);
+
+                }
+            } else {
+                responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
+                responseDTO.setMessage("User Not Found");
+                responseDTO.setContent(null);
+            }
+        } catch (Exception e) {
+
+            responseDTO.setCode(VarList.RSP_ERROR);
+            responseDTO.setMessage(e.getMessage());
+            responseDTO.setContent(null);
         }
+
+        return responseDTO;
     }
 }
