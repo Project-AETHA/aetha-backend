@@ -49,6 +49,10 @@ public class SecurityConfig {
                             .permitAll()
                             .anyRequest().authenticated()
                         )
+                .oauth2Login
+                        (oauth2 -> oauth2
+                                .loginPage("/api/auth/login")
+                        )
                 //* Making the session management stateless, no cookies will be saved
                 .sessionManagement
                         (session-> session

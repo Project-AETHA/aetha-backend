@@ -2,7 +2,6 @@ package com.nighthawk.aetha_backend.controller;
 
 import com.nighthawk.aetha_backend.dto.NotificationDTO;
 import com.nighthawk.aetha_backend.dto.ResponseDTO;
-import com.nighthawk.aetha_backend.entity.Notification;
 import com.nighthawk.aetha_backend.service.NotificationService;
 import com.nighthawk.aetha_backend.utils.predefined.NotifyType;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +11,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Slf4j
