@@ -10,6 +10,7 @@ import com.nighthawk.aetha_backend.utils.VarList;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -78,12 +79,12 @@ public class NotificationService {
     }
 
     //? Retrieve all the notification for a user - returns a response entity
-    public ResponseDTO getNotificationsForUser(String Email) {
+    public ResponseDTO getNotificationsForUser(UserDetails userDetails) {
 
         ResponseDTO responseDTO = new ResponseDTO();
 
         try {
-            AuthUser user = userRepository.findByEmail(Email).orElseThrow(() -> new RuntimeException("User not found"));
+            AuthUser user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new RuntimeException("User not found"));
 
             List<Notification> notifications = notificationRepository.findByRecipient(user);
 
@@ -103,10 +104,18 @@ public class NotificationService {
             responseDTO.setContent(null);
             responseDTO.setErrors(e.getMessage());
             logger.log(Level.SEVERE, "Error retrieving notifications - {}", e.getMessage());
-
         }
 
         return responseDTO;
     }
 
+    public void markNotificationAsRead(String notificationId) {
+        try {
+            Notification notification = notificationRepository.findById(notificationId).orElseThrow(() -> new RuntimeException("Notification not found"));
+            notification.setSeen(true);
+            notificationRepository.save(notification);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error marking notification as read - {}", e.getMessage());
+        }
+    }
 }
