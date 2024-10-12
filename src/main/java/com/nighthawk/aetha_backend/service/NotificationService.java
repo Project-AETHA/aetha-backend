@@ -7,6 +7,7 @@ import com.nighthawk.aetha_backend.entity.Notification;
 import com.nighthawk.aetha_backend.repository.AuthUserRepository;
 import com.nighthawk.aetha_backend.repository.NotificationRepository;
 import com.nighthawk.aetha_backend.utils.VarList;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -17,11 +18,12 @@ import java.util.logging.Logger;
 
 
 @Service
+@RequiredArgsConstructor
 public class NotificationService {
 
     private static final Logger logger = Logger.getLogger(NotificationService.class.getName());
 
-//    private final KafkaTemplate<String, NotificationDTO> kafkaTemplate;
+    private final KafkaTemplate<String, NotificationDTO> kafkaTemplate;
 
     @Autowired
     private NotificationRepository notificationRepository;
@@ -57,14 +59,15 @@ public class NotificationService {
     }
 
 
-    public boolean createAnnouncement(NotificationDTO notification) {
+    public boolean createAnnouncement(NotificationDTO notificationDTO) {
 
         try {
 
-            //? Creating a new notification using the previously built function
-            createNotification(notification);
+            //? Creating a new notificationDTO using the previously built function
+            createNotification(notificationDTO);
 
-
+            //? Sending via the Kafka Template to the Channel "Announcements"
+            kafkaTemplate.send("announcements", notificationDTO);
 
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error creating a notification - {}", e.getMessage());
