@@ -69,21 +69,13 @@ public class NovelController {
     }
 
     // ? Search by title
-    @GetMapping("/title/{title}")
-    public ResponseEntity<ResponseDTO> getNovelByTitle(@PathVariable String title) {
-        return ResponseEntity.ok(novelService.getNovelByTitle(title));
-    }
-
-    // ? Search by tags
-    @GetMapping("/tags")
-    public ResponseEntity<ResponseDTO> getNovelsByTags(@RequestBody RequestDTO request) {
-        return ResponseEntity.ok(novelService.getNovelsByTags(request));
-    }
-
-    // ? Search by genres
-    @GetMapping("/genres")
-    public ResponseEntity<ResponseDTO> getNovelsByGenres(@RequestBody RequestDTO request) {
-        return ResponseEntity.ok(novelService.getNovelsByGenres(request));
+    @PostMapping("/filter")
+    public ResponseEntity<ResponseDTO> getNovelByTitle(
+            @RequestBody RequestDTO requestDTO,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "2") int pageSize
+    ) {
+        return ResponseEntity.ok(novelService.filterNovels(requestDTO, page, pageSize));
     }
 
 }

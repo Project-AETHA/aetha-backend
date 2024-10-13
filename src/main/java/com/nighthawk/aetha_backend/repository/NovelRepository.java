@@ -11,4 +11,5 @@ import java.util.Optional;
 public interface NovelRepository extends MongoRepository<Novel, String> {
     Optional<Novel> findNovelByTitle(String title);
     Page<Novel> findByAuthor(AuthUser author, Pageable pageable);
+    Page<Novel> findByTitle(String title, Pageable pageable);
 }

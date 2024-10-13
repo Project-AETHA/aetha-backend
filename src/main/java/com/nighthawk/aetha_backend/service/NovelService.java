@@ -11,11 +11,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.View;
 
 import java.util.HashMap;
+import java.util.List;
 
 @Service
 public class NovelService {
@@ -28,6 +31,8 @@ public class NovelService {
     private View error;
     @Autowired
     private AuthUserRepository authUserRepository;
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
     public ResponseDTO createNovel(Novel novel) {
 
@@ -98,11 +103,7 @@ public class NovelService {
 
     public ResponseDTO getNovelsByAuthor(String authorId, int page, int pageSize) {
 
-        // TODO - Test this endpoint ( must change the data type of the author attribute to ObjectID )
-
-        //? Search logic for searching novels by an author
         try {
-
             //? Getting the author data
             AuthUser author = authUserRepository.findById(authorId).orElseThrow(() -> new RuntimeException("Author not found"));
 
@@ -121,23 +122,37 @@ public class NovelService {
         return responseDTO;
     }
 
-    public ResponseDTO getNovelByTitle(String title) {
+    public ResponseDTO filterNovels(RequestDTO requestDTO, int page, int pageSize) {
 
         //? Search logic for searching novels by title
+        try {
+            //* Creating the pagination object
+            Pageable pageable = PageRequest.of(page, pageSize);
 
-        return responseDTO;
-    }
+            //* Creating the query object
+            Query query = new Query();
 
-    public ResponseDTO getNovelsByTags(RequestDTO request) {
+            //* Adding the required criteria based on the given request
+            if(!requestDTO.getTitle().isEmpty()) {
+                query.addCriteria(Criteria.where("title").regex(".*" + requestDTO.getTitle() + ".*", "i"));
+            }
 
-        //? Search logic for searching novels by tags
+            //* Include the pageable object to perform pagination on the resultant query
+            query.with(pageable);
 
-        return responseDTO;
-    }
+            //* Run the query and get the results
+            List<Novel> novels = mongoTemplate.find(query, Novel.class);
 
-    public ResponseDTO getNovelsByGenres(RequestDTO request) {
+            responseDTO.setCode(VarList.RSP_SUCCESS);
+            responseDTO.setMessage("Novels relevant to the title fetched successfully");
 
-        //? Search logic for searching novels by genres
+            //! Set the content
+            responseDTO.setContent(novels);
+        } catch (Exception e) {
+            responseDTO.setCode(VarList.RSP_ERROR);
+            responseDTO.setMessage("Error occurred");
+            responseDTO.setContent(e.getMessage());
+        }
 
         return responseDTO;
     }
