@@ -53,15 +53,19 @@ public class NovelController {
     public ResponseEntity<ResponseDTO> getAllNovelsPaginated(
             @RequestBody RequestDTO request,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "2") int pageSize
+            @RequestParam(defaultValue = "5") int pageSize
     ) {
         return ResponseEntity.ok(novelService.getAllNovelsPaginated(page, pageSize));
     }
 
     // ? Search by author
     @GetMapping("/author/{authorId}")
-    public ResponseEntity<ResponseDTO> getNovelsByAuthor(@PathVariable String authorId) {
-        return ResponseEntity.ok(novelService.getNovelsByAuthor(authorId));
+    public ResponseEntity<ResponseDTO> getNovelsByAuthor(
+            @PathVariable String authorId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int pageSize
+    ) {
+        return ResponseEntity.ok(novelService.getNovelsByAuthor(authorId, page, pageSize));
     }
 
     // ? Search by title
