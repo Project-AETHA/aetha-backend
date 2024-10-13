@@ -1,16 +1,20 @@
 package com.nighthawk.aetha_backend.service;
 
 import com.nighthawk.aetha_backend.dto.ResponseDTO;
+import com.nighthawk.aetha_backend.dto.StatDTO;
 import com.nighthawk.aetha_backend.dto.UserDTO;
 import com.nighthawk.aetha_backend.entity.AccStatus;
 import com.nighthawk.aetha_backend.entity.AuthUser;
 import com.nighthawk.aetha_backend.repository.AuthUserRepository;
+import com.nighthawk.aetha_backend.repository.SupportTicketRepository;
 import com.nighthawk.aetha_backend.utils.VarList;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,6 +25,9 @@ public class UserService {
     private AuthUserRepository repository;
 
     @Autowired
+    private SupportTicketRepository supportTicketRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
@@ -28,6 +35,9 @@ public class UserService {
 
     @Autowired
     private ResponseDTO responseDTO;
+
+    @Autowired
+    private StatDTO statDTO;
 
     public ResponseDTO getAllUsers() {
 
@@ -141,11 +151,11 @@ public class UserService {
         try {
             AuthUser user = repository.findByEmail(email).orElse(null);
 
-            if(user != null) {
+            if (user != null) {
                 user.setStatus(AccStatus.DELETED);
                 AuthUser deletedUser = repository.save(user);
 
-                if( deletedUser != null ){
+                if (deletedUser != null) {
                     responseDTO.setCode(VarList.RSP_SUCCESS);
                     responseDTO.setMessage("User deleted Successfully");
                     responseDTO.setContent(deletedUser);
@@ -170,4 +180,112 @@ public class UserService {
 
         return responseDTO;
     }
+
+    public ResponseDTO addUser(AuthUser user) {
+
+        try {
+            HashMap<String, String> errors = new HashMap<>();
+
+            if (repository.findByEmail(user.getEmail()).isPresent()) {
+                responseDTO.setCode(VarList.RSP_DUPLICATED);
+                responseDTO.setMessage("Email already exists");
+                responseDTO.setContent(null);
+            } else {
+
+                if (user.getFirstname() == null) {
+                    errors.put("Firstname", "First name cannot be empty");
+                }
+                if (user.getLastname() == null) {
+                    errors.put("Lastname", "Last name cannot be empty");
+                }
+                if (user.getEmail() == null) {
+                    errors.put("Email", "Email cannot be empty");
+                }
+                if (user.getPassword() == null) {
+                    errors.put("Password", "Password cannot be empty");
+                }
+
+                if (errors.isEmpty()) {
+                    user.setDisplayName(user.getFirstname().concat(" ").concat(user.getLastname()));
+                    user.setPassword(passwordEncoder.encode(user.getPassword()));
+                    user.setStatus(AccStatus.ACTIVE);
+
+                    AuthUser newuser = repository.save(user);
+
+                    if (newuser != null) {
+
+                        responseDTO.setCode(VarList.RSP_SUCCESS);
+                        responseDTO.setMessage("User added Successfully");
+                        responseDTO.setContent(newuser);
+                    } else {
+
+                        responseDTO.setCode(VarList.RSP_ERROR);
+                        responseDTO.setMessage("Failed user adding");
+                        responseDTO.setContent(null);
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+
+            responseDTO.setCode(VarList.RSP_ERROR);
+            responseDTO.setMessage(e.getMessage());
+            responseDTO.setContent(null);
+        }
+
+        return responseDTO;
+    }
+
+    public ResponseDTO disableUser ( String email){
+
+          try {
+              AuthUser user = repository.findByEmail(email).orElse(null);
+
+              if(user != null) {
+                   user.setStatus(AccStatus.DISABLED);
+                   AuthUser disabledUser = repository.save(user);
+
+                   responseDTO.setCode(VarList.RSP_SUCCESS);
+                   responseDTO.setMessage("User disabled Successfully");
+                   responseDTO.setContent(disabledUser);
+
+              } else {
+                  responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
+                  responseDTO.setMessage("User not found");
+                  responseDTO.setContent(null);
+
+              }
+          } catch (Exception e) {
+
+              responseDTO.setCode(VarList.RSP_FAIL);
+              responseDTO.setMessage(e.getMessage());
+              responseDTO.setContent(null);
+          }
+
+          return responseDTO;
+    }
+
+    public ResponseDTO getStatistics(){
+
+        try {
+            long totalUsers = repository.count();
+            long totalComplaints = supportTicketRepository.count();
+
+            statDTO.setTotalUsers(totalUsers);
+            statDTO.setTotalComplaints(totalComplaints);
+
+            responseDTO.setCode(VarList.RSP_SUCCESS);
+            responseDTO.setMessage("Total users and complaints fetched successfully");
+            responseDTO.setContent(statDTO);
+
+        } catch ( Exception e ) {
+
+            responseDTO.setCode(VarList.RSP_FAIL);
+            responseDTO.setMessage(e.getMessage());
+            responseDTO.setContent(null);
+        }
+
+    return responseDTO;
+    }
 }
+

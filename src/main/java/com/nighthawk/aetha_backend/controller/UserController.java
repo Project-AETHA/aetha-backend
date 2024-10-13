@@ -56,4 +56,25 @@ public class UserController {
         return ResponseEntity.ok(userService.deleteUser(email));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/add-user")
+    public ResponseEntity<ResponseDTO> addUser (@RequestBody AuthUser user){
+
+        return ResponseEntity.ok(userService.addUser(user));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/disable/{email}")
+    public ResponseEntity<ResponseDTO> disableUser (@PathVariable String email){
+
+        return ResponseEntity.ok(userService.disableUser(email));
+    }
+
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/stat")
+    public ResponseEntity<ResponseDTO> getStatistics (){
+
+        return ResponseEntity.ok(userService.getStatistics());
+    }
 }
