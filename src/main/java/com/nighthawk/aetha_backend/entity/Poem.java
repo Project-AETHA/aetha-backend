@@ -33,7 +33,7 @@ public class Poem {
     @Indexed
     private String title;
 
-    private List<String> tags;
+    private List<Genres> genres;
 
     private String content;
 
@@ -50,6 +50,8 @@ public class Poem {
     private List<String> comments;
 
     private Integer upvotes;
+
+    private Integer downvotes;
 
 
 
