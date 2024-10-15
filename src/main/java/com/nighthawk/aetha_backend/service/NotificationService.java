@@ -13,6 +13,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -40,9 +41,11 @@ public class NotificationService {
             Notification newNotification = new Notification();
             newNotification.setType(notification.getType());
             newNotification.setSubject(notification.getSubject());
+            newNotification.setCategory(notification.getCategory());
             newNotification.setMessage(notification.getMessage());
             newNotification.setSeen(notification.getSeen());
             newNotification.setLink(notification.getLink());
+            newNotification.setCreatedAt(new Date());
 
             //? Getting the recipient from the email via user repository
             newNotification.setRecipient(userRepository.findByEmail(notification.getRecipient()).orElseThrow(() -> new RuntimeException("User not found")));

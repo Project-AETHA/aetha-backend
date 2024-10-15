@@ -3,6 +3,7 @@ package com.nighthawk.aetha_backend.controller;
 import com.nighthawk.aetha_backend.dto.NotificationDTO;
 import com.nighthawk.aetha_backend.dto.ResponseDTO;
 import com.nighthawk.aetha_backend.service.NotificationService;
+import com.nighthawk.aetha_backend.utils.predefined.NotificationCategory;
 import com.nighthawk.aetha_backend.utils.predefined.NotifyType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,7 @@ public class NotificationController {
 
             NotificationDTO notification = new NotificationDTO();
             notification.setType(NotifyType.PUSH_NOTIFICATION);
+            notification.setCategory(NotificationCategory.EVENT);
             notification.setSubject("New Notification");
             notification.setMessage("This is a new notification");
             notification.setSeen(false);
