@@ -43,4 +43,10 @@ public class Novel {
     private Date manualReleaseDate;
 
     private List<Review> reviews;
+
+    private String status;
+
+    private Date created_At;
+
+    private Date published_At;
 }

@@ -39,6 +39,7 @@ public class Poem {
 
     private Date created_At;
 
+
     private String image;
 
     private Integer views;
@@ -52,6 +53,8 @@ public class Poem {
     private Integer upvotes;
 
     private Integer downvotes;
+
+
 
 
 
