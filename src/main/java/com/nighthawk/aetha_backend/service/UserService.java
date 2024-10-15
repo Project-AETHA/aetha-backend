@@ -6,7 +6,9 @@ import com.nighthawk.aetha_backend.dto.UserDTO;
 import com.nighthawk.aetha_backend.entity.AccStatus;
 import com.nighthawk.aetha_backend.entity.AuthUser;
 import com.nighthawk.aetha_backend.repository.AuthUserRepository;
+import com.nighthawk.aetha_backend.repository.NovelRepository;
 import com.nighthawk.aetha_backend.repository.SupportTicketRepository;
+import com.nighthawk.aetha_backend.utils.StatusList;
 import com.nighthawk.aetha_backend.utils.VarList;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +26,6 @@ public class UserService {
     @Autowired
     private AuthUserRepository repository;
 
-    @Autowired
-    private SupportTicketRepository supportTicketRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -36,8 +36,6 @@ public class UserService {
     @Autowired
     private ResponseDTO responseDTO;
 
-    @Autowired
-    private StatDTO statDTO;
 
     public ResponseDTO getAllUsers() {
 
@@ -265,27 +263,6 @@ public class UserService {
           return responseDTO;
     }
 
-    public ResponseDTO getStatistics(){
 
-        try {
-            long totalUsers = repository.count();
-            long totalComplaints = supportTicketRepository.count();
-
-            statDTO.setTotalUsers(totalUsers);
-            statDTO.setTotalComplaints(totalComplaints);
-
-            responseDTO.setCode(VarList.RSP_SUCCESS);
-            responseDTO.setMessage("Total users and complaints fetched successfully");
-            responseDTO.setContent(statDTO);
-
-        } catch ( Exception e ) {
-
-            responseDTO.setCode(VarList.RSP_FAIL);
-            responseDTO.setMessage(e.getMessage());
-            responseDTO.setContent(null);
-        }
-
-    return responseDTO;
-    }
 }
 
