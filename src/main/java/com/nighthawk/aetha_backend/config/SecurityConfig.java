@@ -42,7 +42,9 @@ public class SecurityConfig {
                                     "/swagger-ui/**",
                                     "/v3/api-docs/**",
                                     "/api/files/**",
-                                    "/api/books"
+                                    "/api/books",
+                                    "/api/ebooks/**", // TODO : Check this line
+                                    "/api/config/**"
                             )
                             .permitAll()
                             .anyRequest().authenticated()

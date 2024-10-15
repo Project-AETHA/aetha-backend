@@ -2,6 +2,7 @@ package com.nighthawk.aetha_backend.dto;
 
 import com.nighthawk.aetha_backend.entity.Genres;
 import com.nighthawk.aetha_backend.entity.Tags;
+import com.nighthawk.aetha_backend.utils.predefined.ContentStatus;
 import lombok.Data;
 
 import java.util.Date;
@@ -16,6 +17,7 @@ public class EbookExternalDTO {
     private String description;
     private String isbn;
     private List<Genres> genres;
+
     private List<Tags> tags;
     private List<String> custom_tags;
     private String author;
@@ -25,4 +27,5 @@ public class EbookExternalDTO {
     private Integer sold_amount = 0;
     private Integer rating;
     private Integer views;
+    private ContentStatus status;
 }

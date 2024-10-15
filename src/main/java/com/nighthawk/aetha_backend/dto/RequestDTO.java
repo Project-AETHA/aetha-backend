@@ -2,6 +2,7 @@ package com.nighthawk.aetha_backend.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Date;
@@ -9,6 +10,7 @@ import java.util.List;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class RequestDTO {
     private String title;
     private List<String> genres;
@@ -23,6 +25,9 @@ public class RequestDTO {
     private Integer sold_amount;
     private Date createdAt;
     private Date updatedAt;
+    private String searchTerm;
+    private Double rating;
+    private Date publishedWithin;
 
     // ? Specific to Content
     private Date manual_release_date;
