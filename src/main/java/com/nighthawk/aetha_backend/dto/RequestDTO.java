@@ -21,8 +21,8 @@ public class RequestDTO {
     private String email;
     private String price;
     private List<String> tags;
-    private List<String> custom_tags;
-    private Integer sold_amount;
+    private List<String> customTags;
+    private Integer soldAmount;
     private Date createdAt;
     private Date updatedAt;
     private String searchTerm;
@@ -30,5 +30,5 @@ public class RequestDTO {
     private Date publishedWithin;
 
     // ? Specific to Content
-    private Date manual_release_date;
+    private Date manualReleaseDate;
 }

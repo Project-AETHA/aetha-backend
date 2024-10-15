@@ -1,7 +1,9 @@
 package com.nighthawk.aetha_backend.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -13,6 +15,8 @@ import java.util.List;
 @Builder
 @Data
 @Document("novels")
+@AllArgsConstructor
+@NoArgsConstructor
 public class Novel {
 
     @Id
@@ -27,16 +31,16 @@ public class Novel {
 
     private String synopsis;
     private String description;
-    private String cover_image;
+    private String coverImage;
 
     private List<Genres> genre;
     private List<String> tags;
-    private List<String> custom_tags;
+    private List<String> customTags;
 
     // ? Not sure of the content
-    private List<String> content_warning;
+    private List<String> contentWarning;
 
-    private Date manual_release_date;
+    private Date manualReleaseDate;
 
     private List<Review> reviews;
 
