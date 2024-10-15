@@ -4,6 +4,7 @@ import com.nighthawk.aetha_backend.dto.EbookFeedbackDTO;
 import com.nighthawk.aetha_backend.entity.AuthUser;
 import com.nighthawk.aetha_backend.entity.Genres;
 import com.nighthawk.aetha_backend.entity.Tags;
+import com.nighthawk.aetha_backend.utils.predefined.ContentStatus;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -39,9 +40,10 @@ public class EbookExternal {
     private List<EbookReviews> reviews;
 
     // ? Overall rating of all the current reviews and total of all the views
-    private Integer rating;
+    private Double rating;
     private Integer views;
 
     private List<EbookFeedbackDTO> feedback; //? This won't be included in the EBookExternalDTO
 
+    private ContentStatus status;
 }
