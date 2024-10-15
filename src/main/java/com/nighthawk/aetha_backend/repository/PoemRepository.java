@@ -4,6 +4,7 @@ import com.nighthawk.aetha_backend.entity.AuthUser;
 import com.nighthawk.aetha_backend.entity.Poem;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,4 +16,5 @@ import java.util.Optional;
 public interface PoemRepository extends MongoRepository<Poem, String>{
 
    // ? List<Poem> findPoemByAuthor(AuthUser author);
+   long countByCreatedAtBetween(LocalDate startDate, LocalDate endDate);
 }
