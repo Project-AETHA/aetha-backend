@@ -124,8 +124,8 @@ public class EbookExternalService {
             }
 
             // Convert custom_tags to uppercase
-            if(ebook.getCustom_tags() != null) {
-                List<String> customTagsUpper = ebook.getCustom_tags().stream()
+            if(ebook.getCustomTags() != null) {
+                List<String> customTagsUpper = ebook.getCustomTags().stream()
                         .map(String::toUpperCase)
                         .collect(Collectors.toList());
                 newBook.setCustom_tags(customTagsUpper);

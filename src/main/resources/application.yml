@@ -18,7 +18,10 @@ spring:
           google:
             client-id: 611394632820-n4cgorcjr24q4s2nn3obic3hkpg4cn1l.apps.googleusercontent.com
             client-secret: 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
-            scope: email, profile
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope:
+              - email
+              - profile
 
   app:
     jwtSecret: 1a8a5fc2bae92e78ca36dc26642c6f8fa69af0683542bc365552284baf251fccs
