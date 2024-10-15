@@ -24,29 +24,11 @@ public class SettingsService {
     @Autowired
     private ModelMapper modelMapper;
 
-    public SettingsDTO saveSettings(SettingsDTO settingsDTO) {
-        settingsRepository.save(modelMapper.map(settingsDTO, Settings.class));
-        return settingsDTO;
-    }
+    public SettingsDTO saveSettings(Settings settings) {
 
-    public List<Settings> getAllSettings() {
-        return settingsRepository.findAll();
-    }
+        Settings savedSettings = settingsRepository.save(settings);
 
-    public SettingsDTO updateSettings(SettingsDTO settingsDTO) {
-        settingsRepository.save(modelMapper.map(Settings.class, SettingsDTO.class));
-        return settingsDTO;
-    }
-
-    public boolean deleteSettings(SettingsDTO settingsDTO){
-        settingsRepository.delete(modelMapper.map(settingsDTO,Settings.class));
-        return true;
-    }
-
-    public Settings findSettingByUserId(String id) {
-        AuthUser user = userRepository.findById(id);
-
-        return settingsRepository.findByUser(user);
+        return modelMapper.map(savedSettings, SettingsDTO.class);
     }
 }
 

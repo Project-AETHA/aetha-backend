@@ -1,8 +1,12 @@
 package com.nighthawk.aetha_backend.controller;
 
+import com.nighthawk.aetha_backend.dto.ResponseDTO;
 import com.nighthawk.aetha_backend.dto.SettingsDTO;
+import com.nighthawk.aetha_backend.entity.Settings;
 import com.nighthawk.aetha_backend.service.SettingsService;
+import com.nighthawk.aetha_backend.utils.VarList;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,28 +18,24 @@ public class SettingsController {
     @Autowired
     private SettingsService settingsService;
 
-    @GetMapping("/getSettings")
-    public List<SettingsDTO> getSettings(){
-        return settingsService.getAllSettings();
-    }
-
-    @GetMapping("/getSettings/{id}")
-    public SettingsDTO getSettingsForUser(@PathVariable String id) {
-        return settingsService.findSettingByUserId(id);
-    }
+    @Autowired
+    private ResponseDTO responseDTO;
 
     @PostMapping("/saveSettings")
-    public SettingsDTO saveSettings(@RequestBody SettingsDTO settingsDTO){
-        return settingsService.saveSettings(settingsDTO);
-    }
+    public ResponseEntity<ResponseDTO> saveSettings(@RequestBody Settings settings){
 
-    @PutMapping("/updateSettings")
-    public SettingsDTO updateSettings(@RequestBody SettingsDTO settingsDTO){
-        return settingsService.updateSettings(settingsDTO);
-    }
+        SettingsDTO settingsDTO = settingsService.saveSettings(settings);
 
-    @DeleteMapping("deleteSettings")
-    public boolean deleteSettings(@RequestBody SettingsDTO settingsDTO){
-        return settingsService.deleteSettings(settingsDTO);
+        if(settingsDTO == null){
+            responseDTO.setCode(VarList.RSP_FAIL);
+            responseDTO.setMessage("Failed to save the settings");
+            responseDTO.setContent(null);
+        } else {
+            responseDTO.setCode(VarList.RSP_SUCCESS);
+            responseDTO.setMessage("Successfully saved the settings");
+            responseDTO.setContent(settingsDTO);
+        }
+
+        return ResponseEntity.ok(responseDTO);
     }
 }

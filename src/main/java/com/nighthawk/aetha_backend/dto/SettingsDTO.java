@@ -1,5 +1,7 @@
 package com.nighthawk.aetha_backend.dto;
 
+import lombok.Data;
+
 @Data
 public class SettingsDTO {
     private String id;
