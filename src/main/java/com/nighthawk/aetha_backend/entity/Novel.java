@@ -1,5 +1,6 @@
 package com.nighthawk.aetha_backend.entity;
 
+import com.nighthawk.aetha_backend.utils.StatusList;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,6 +10,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.DocumentReference;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -39,14 +41,9 @@ public class Novel {
 
     // ? Not sure of the content
     private List<String> contentWarning;
-
     private Date manualReleaseDate;
-
     private List<Review> reviews;
-
-    private String status;
-
-    private Date created_At;
-
-    private Date published_At;
+    private StatusList status;
+    private LocalDate createdAt;
+    private LocalDate publishedAt;
 }
