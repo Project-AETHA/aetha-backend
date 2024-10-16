@@ -59,7 +59,12 @@ public class NotificationController {
 
     @GetMapping("/getAll")
     public ResponseEntity<ResponseDTO> getMyNotifications(@AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(notificationService.getNotificationsForUser(userDetails.getUsername()));
+        return ResponseEntity.ok(notificationService.getNotificationsForUser(userDetails));
+    }
+
+    @PatchMapping("/markAsRead/{notificationId}")
+    public void markNotificationAsRead(@PathVariable String notificationId) {
+        notificationService.markNotificationAsRead(notificationId);
     }
 
 }

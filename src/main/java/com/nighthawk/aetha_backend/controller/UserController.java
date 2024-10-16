@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@CrossOrigin("http://localhost:5173")
+@CrossOrigin
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/user")
@@ -71,10 +71,5 @@ public class UserController {
     }
 
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/stat")
-    public ResponseEntity<ResponseDTO> getStatistics (){
 
-        return ResponseEntity.ok(userService.getStatistics());
-    }
 }

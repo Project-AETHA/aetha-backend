@@ -6,6 +6,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.DocumentReference;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -32,28 +33,14 @@ public class Poem {
 
     @Indexed
     private String title;
-
     private List<Genres> genres;
-
     private String content;
-
-    private Date created_At;
-
     private String image;
-
     private Integer views;
-
     private Integer clicks;
-
     private Boolean visibility;
-
     private List<String> comments;
-
     private Integer upvotes;
-
     private Integer downvotes;
-
-
-
-
+    private LocalDate createdAt;
 }

@@ -19,7 +19,7 @@ import java.util.List;
 // ? RequestMapping - define the which requests accepts by this controller
 
 @CrossOrigin // ? onema port ekakin ena request backend eken acces karanna me annotation pawichchi krnne
-@RestController
+@RestController // ? controller ekak kiyla identify karaganna.
 @RequestMapping("/api/poems")
 public class PoemController {
 
