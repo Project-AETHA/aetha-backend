@@ -1,5 +1,6 @@
 package com.nighthawk.aetha_backend.controller;
 
+import com.nighthawk.aetha_backend.dto.NovelDTO;
 import com.nighthawk.aetha_backend.dto.RequestDTO;
 import com.nighthawk.aetha_backend.dto.ResponseDTO;
 import com.nighthawk.aetha_backend.entity.Novel;
@@ -33,8 +34,8 @@ public class NovelController {
 
     // ? Creating a novel
     @PostMapping("/create")
-    public ResponseEntity<ResponseDTO> createNovel(@RequestBody Novel novel, @AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(novelService.createNovel(novel, userDetails));
+    public ResponseEntity<ResponseDTO> createNovel(@RequestBody NovelDTO novelDTO, @AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(novelService.createNovel(novelDTO, userDetails));
     }
 
     // ? Update a novel

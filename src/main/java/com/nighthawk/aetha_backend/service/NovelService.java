@@ -1,14 +1,18 @@
 package com.nighthawk.aetha_backend.service;
 
 import com.nighthawk.aetha_backend.dto.NotificationDTO;
+import com.nighthawk.aetha_backend.dto.NovelDTO;
 import com.nighthawk.aetha_backend.dto.RequestDTO;
 import com.nighthawk.aetha_backend.dto.ResponseDTO;
 import com.nighthawk.aetha_backend.entity.AuthUser;
+import com.nighthawk.aetha_backend.entity.Genres;
 import com.nighthawk.aetha_backend.entity.Novel;
+import com.nighthawk.aetha_backend.entity.Tags;
 import com.nighthawk.aetha_backend.repository.AuthUserRepository;
 import com.nighthawk.aetha_backend.repository.NovelRepository;
 import com.nighthawk.aetha_backend.utils.VarList;
 import com.nighthawk.aetha_backend.utils.predefined.ContentStatus;
+import com.nighthawk.aetha_backend.utils.predefined.ContentWarnings;
 import com.nighthawk.aetha_backend.utils.predefined.NotificationCategory;
 import com.nighthawk.aetha_backend.utils.predefined.NotifyType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +25,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -38,20 +43,73 @@ public class NovelService {
     @Autowired
     private NotificationService notificationService;
 
-    public ResponseDTO createNovel(Novel novel, UserDetails userDetails) {
+    public ResponseDTO createNovel(NovelDTO novelDTO, UserDetails userDetails) {
 
         HashMap<String, String> errors = new HashMap<>();
+        Novel novel = new Novel();
 
         try {
             //? Validation logic
-            if(novel.getTitle() != null && novel.getTitle().isEmpty()) errors.put("title", "Title cannot be empty");
-            if(novel.getSynopsis() != null && novel.getSynopsis().isEmpty()) errors.put("synopsis", "Synopsis cannot be empty");
-            if(novel.getDescription() != null && novel.getDescription().isEmpty()) errors.put("description", "Description cannot be empty");
-            if(novel.getCoverImage() != null && novel.getCoverImage().isEmpty()) errors.put("coverImage", "Cover image cannot be empty");
-            if(novel.getGenre() == null) errors.put("genre", "Genre cannot be empty");
-            if(novel.getContentWarning() == null) errors.put("contentWarning", "Content warnings cannot be empty");
+            if(novelDTO.getTitle() == null || novelDTO.getTitle().isEmpty()) errors.put("title", "Title cannot be empty");
+            else novel.setTitle(novelDTO.getTitle());
+
+            if(novelDTO.getSynopsis() == null || novelDTO.getSynopsis().isEmpty()) errors.put("synopsis", "Synopsis cannot be empty");
+            else novel.setSynopsis(novelDTO.getSynopsis());
+
+            if(novelDTO.getDescription() == null || novelDTO.getDescription().isEmpty()) errors.put("description", "Description cannot be empty");
+            else novel.setDescription(novelDTO.getDescription());
+
+            if(novelDTO.getCoverImage() == null || novelDTO.getCoverImage().isEmpty()) errors.put("coverImage", "Cover image cannot be empty");
+            else novel.setCoverImage(novelDTO.getCoverImage());
+
+            if(novelDTO.getGenres() == null) errors.put("genre", "Genre cannot be empty");
+            else {
+                List<Genres> genreList = new ArrayList<>();
+                for (String genreString : novelDTO.getGenres()) {
+                    String trimmedGenre = genreString.trim().toUpperCase();
+                    try {
+                        Genres genre = Genres.valueOf(trimmedGenre);
+                        genreList.add(genre);
+                    } catch (IllegalArgumentException e) {
+                        errors.put("genres", "Invalid genre: " + trimmedGenre);
+                    }
+                }
+                novel.setGenres(genreList);
+            }
+
+            if(novelDTO.getTags() != null) {
+                List<Tags> tagsList = new ArrayList<>();
+                for (String tagString : novelDTO.getTags()) {
+                    String trimmedTag = tagString.trim().toUpperCase();
+                    try {
+                        Tags tag = Tags.valueOf(trimmedTag);
+                        tagsList.add(tag);
+                    } catch (IllegalArgumentException e) {
+                        errors.put("tags", "Invalid tag: " + trimmedTag);
+                    }
+                }
+                novel.setTags(tagsList);
+            }
+
+            if(novelDTO.getContentWarning() == null) errors.put("contentWarning", "Content warnings cannot be empty");
+            else {
+                List<ContentWarnings> warningsList = new ArrayList<>();
+                for (String warningString : novelDTO.getContentWarning()) {
+                    String trimmedWarning = warningString.trim().toUpperCase();
+                    try {
+                        ContentWarnings warning = ContentWarnings.valueOf(trimmedWarning);
+                        warningsList.add(warning);
+                    } catch (IllegalArgumentException e) {
+                        errors.put("contentWarning", "Invalid warning: " + trimmedWarning);
+                    }
+                }
+                novel.setContentWarning(warningsList);
+            }
+
             novel.setAuthor(authUserRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new RuntimeException("Author not found")));
-            novel.setStatus(ContentStatus.PENDING);
+            novelDTO.setStatus(ContentStatus.PENDING);
+
+            //? TODO - Manual release date
 
             if(errors.isEmpty()) {
                 responseDTO.setCode(VarList.RSP_SUCCESS);
