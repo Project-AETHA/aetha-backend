@@ -25,6 +25,7 @@ public class NovelController {
     // TODO - moved on to finalizing the eBook module
 
 
+    //? Get novel by Novel ID
     @GetMapping("/{novelId}")
     public ResponseEntity<ResponseDTO> getNovelById(@PathVariable String novelId) {
         return ResponseEntity.ok(novelService.getNovelById(novelId));
@@ -67,6 +68,12 @@ public class NovelController {
         return ResponseEntity.ok(novelService.getAllNovelsPaginated(page, pageSize));
     }
 
+    //? Get my novels
+    @GetMapping("/my")
+    public ResponseEntity<ResponseDTO> getMyNovels(@AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(novelService.getMyNovels(userDetails));
+    }
+
     // ? Search by author
     @GetMapping("/author/{authorId}")
     public ResponseEntity<ResponseDTO> getNovelsByAuthor(
@@ -75,6 +82,18 @@ public class NovelController {
             @RequestParam(defaultValue = "5") int pageSize
     ) {
         return ResponseEntity.ok(novelService.getNovelsByAuthor(authorId, page, pageSize));
+    }
+
+    //!!! Search results for novels
+    // TODO - Implement the search functionality
+    @PostMapping("/search")
+    public ResponseEntity<ResponseDTO> searchNovels(
+            @RequestBody RequestDTO requestDTO,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int pageSize
+    ) {
+//        return ResponseEntity.ok(novelService.searchNovels(requestDTO, page, pageSize));
+        return null;
     }
 
     // ? Search by title

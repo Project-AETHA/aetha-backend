@@ -244,4 +244,21 @@ public class NovelService {
 
         return responseDTO;
     }
+
+    public ResponseDTO getMyNovels(UserDetails userDetails) {
+        try {
+            AuthUser user = authUserRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new RuntimeException("User not found"));
+            List<Novel> novels = novelRepository.findByAuthor(user);
+
+            responseDTO.setCode(VarList.RSP_SUCCESS);
+            responseDTO.setMessage("Novels fetched successfully");
+            responseDTO.setContent(novels);
+        } catch (Exception e) {
+            responseDTO.setCode(VarList.RSP_ERROR);
+            responseDTO.setMessage("Error fetching novels");
+            responseDTO.setContent(e.getMessage());
+        }
+
+        return responseDTO;
+    }
 }
