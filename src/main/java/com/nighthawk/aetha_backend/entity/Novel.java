@@ -1,6 +1,7 @@
 package com.nighthawk.aetha_backend.entity;
 
 import com.nighthawk.aetha_backend.utils.StatusList;
+import com.nighthawk.aetha_backend.utils.predefined.ContentStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -43,7 +44,11 @@ public class Novel {
     private List<String> contentWarning;
     private Date manualReleaseDate;
     private List<Review> reviews;
-    private StatusList status;
+
+    //? Default status is PENDING, after admin approval the status will be changed to PUBLISHED
+    private ContentStatus status;
     private LocalDate createdAt;
+
+    //? Published datetime will be added when the admin has approved and published the novel
     private LocalDate publishedAt;
 }

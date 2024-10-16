@@ -26,7 +26,7 @@ public class Notification {
     private NotificationCategory category = NotificationCategory.GENERAL;
     private String subject;
     private String message;
-    private Boolean seen;
+    private Boolean seen = false;
     private String link;
 
     @DocumentReference(collection = "users")
@@ -34,6 +34,6 @@ public class Notification {
     private AuthUser recipient;
 
     @CreatedDate
-    private Date createdAt;
+    private Date createdAt = new Date();
 
 }

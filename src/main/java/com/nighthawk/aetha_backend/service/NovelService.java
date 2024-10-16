@@ -1,5 +1,6 @@
 package com.nighthawk.aetha_backend.service;
 
+import com.nighthawk.aetha_backend.dto.NotificationDTO;
 import com.nighthawk.aetha_backend.dto.RequestDTO;
 import com.nighthawk.aetha_backend.dto.ResponseDTO;
 import com.nighthawk.aetha_backend.entity.AuthUser;
@@ -7,6 +8,9 @@ import com.nighthawk.aetha_backend.entity.Novel;
 import com.nighthawk.aetha_backend.repository.AuthUserRepository;
 import com.nighthawk.aetha_backend.repository.NovelRepository;
 import com.nighthawk.aetha_backend.utils.VarList;
+import com.nighthawk.aetha_backend.utils.predefined.ContentStatus;
+import com.nighthawk.aetha_backend.utils.predefined.NotificationCategory;
+import com.nighthawk.aetha_backend.utils.predefined.NotifyType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -14,8 +18,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.View;
 
 import java.util.HashMap;
 import java.util.List;
@@ -28,24 +32,26 @@ public class NovelService {
     @Autowired
     private NovelRepository novelRepository;
     @Autowired
-    private View error;
-    @Autowired
     private AuthUserRepository authUserRepository;
     @Autowired
     private MongoTemplate mongoTemplate;
+    @Autowired
+    private NotificationService notificationService;
 
-    public ResponseDTO createNovel(Novel novel) {
+    public ResponseDTO createNovel(Novel novel, UserDetails userDetails) {
 
         HashMap<String, String> errors = new HashMap<>();
 
         try {
             //? Validation logic
-            if(novel.getTitle().isEmpty()) errors.put("title", "Title cannot be empty");
-            if(novel.getSynopsis().isEmpty()) errors.put("synopsis", "Synopsis cannot be empty");
-            if(novel.getDescription().isEmpty()) errors.put("description", "Description cannot be empty");
-            if(novel.getCoverImage().isEmpty()) errors.put("coverImage", "Cover image cannot be empty");
-            if(novel.getGenre().isEmpty()) errors.put("genre", "Genre cannot be empty");
-            if(novel.getContentWarning().isEmpty()) errors.put("contentWarning", "Content warnings cannot be empty");
+            if(novel.getTitle() != null && novel.getTitle().isEmpty()) errors.put("title", "Title cannot be empty");
+            if(novel.getSynopsis() != null && novel.getSynopsis().isEmpty()) errors.put("synopsis", "Synopsis cannot be empty");
+            if(novel.getDescription() != null && novel.getDescription().isEmpty()) errors.put("description", "Description cannot be empty");
+            if(novel.getCoverImage() != null && novel.getCoverImage().isEmpty()) errors.put("coverImage", "Cover image cannot be empty");
+            if(novel.getGenre() == null) errors.put("genre", "Genre cannot be empty");
+            if(novel.getContentWarning() == null) errors.put("contentWarning", "Content warnings cannot be empty");
+            novel.setAuthor(authUserRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new RuntimeException("Author not found")));
+            novel.setStatus(ContentStatus.PENDING);
 
             if(errors.isEmpty()) {
                 responseDTO.setCode(VarList.RSP_SUCCESS);
@@ -59,7 +65,7 @@ public class NovelService {
             }
         } catch (Exception e) {
             responseDTO.setCode(VarList.RSP_ERROR);
-            responseDTO.setMessage("Error Occured");
+            responseDTO.setMessage("Error Occurred");
             responseDTO.setContent(e.getMessage());
         }
 
@@ -169,6 +175,72 @@ public class NovelService {
 
         //! Should include a pre-check about any subscriptions before deleting a book
         //? Deletion logic
+
+        return responseDTO;
+    }
+
+    public ResponseDTO getNovelById(String novelId) {
+        try {
+            responseDTO.setCode(VarList.RSP_SUCCESS);
+            responseDTO.setMessage("Novel fetched successfully");
+            responseDTO.setContent(novelRepository.findById(novelId).orElseThrow(() -> new RuntimeException("Novel not found")));
+        } catch (Exception e) {
+            responseDTO.setCode(VarList.RSP_ERROR);
+            responseDTO.setMessage("Error fetching novel");
+            responseDTO.setContent(e.getMessage());
+        }
+
+        return responseDTO;
+    }
+
+    public ResponseDTO approveNovel(String novelId) {
+        try {
+            Novel novel = novelRepository.findById(novelId).orElseThrow(() -> new RuntimeException("Novel not found"));
+            novel.setStatus(ContentStatus.APPROVED);
+            novelRepository.save(novel);
+
+            responseDTO.setCode(VarList.RSP_SUCCESS);
+            responseDTO.setMessage("Novel approved successfully");
+            responseDTO.setContent(novel);
+        } catch (Exception e) {
+            responseDTO.setCode(VarList.RSP_ERROR);
+            responseDTO.setMessage("Error approving novel");
+            responseDTO.setContent(e.getMessage());
+        }
+
+        return responseDTO;
+    }
+
+    public ResponseDTO rejectNovel(String novelId) {
+        try {
+
+            //? Updating the novel's status
+            Novel novel = novelRepository.findById(novelId).orElseThrow(() -> new RuntimeException("Novel not found"));
+            novel.setStatus(ContentStatus.REJECTED);
+            novelRepository.save(novel);
+
+            //? Sending notification to the author about the rejection
+            NotificationDTO notification = new NotificationDTO();
+            notification.setType(NotifyType.PUSH_NOTIFICATION);
+            notification.setCategory(NotificationCategory.UPDATE);
+            notification.setSubject("Novel Rejected");
+            notification.setMessage("The novel " + novel.getTitle() + " has been rejected");
+            notification.setLink("/author/novels/" + novel.getId());
+            notification.setRecipient(novel.getAuthor());
+
+
+            if(!notificationService.createNotification(notification)) {
+                throw new RuntimeException("Error sending notification");
+            }
+
+            responseDTO.setCode(VarList.RSP_SUCCESS);
+            responseDTO.setMessage("Novel declined successfully");
+            responseDTO.setContent(novel);
+        } catch (Exception e) {
+            responseDTO.setCode(VarList.RSP_ERROR);
+            responseDTO.setMessage("Error rejecting novel");
+            responseDTO.setContent(e.getMessage());
+        }
 
         return responseDTO;
     }

@@ -6,6 +6,9 @@ import com.nighthawk.aetha_backend.entity.Novel;
 import com.nighthawk.aetha_backend.service.NovelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin
@@ -21,10 +24,16 @@ public class NovelController {
 
     // TODO - moved on to finalizing the eBook module
 
+
+    @GetMapping("/{novelId}")
+    public ResponseEntity<ResponseDTO> getNovelById(@PathVariable String novelId) {
+        return ResponseEntity.ok(novelService.getNovelById(novelId));
+    }
+
     // ? Creating a novel
     @PostMapping("/create")
-    public ResponseEntity<ResponseDTO> createNovel(@RequestBody Novel novel) {
-        return ResponseEntity.ok(novelService.createNovel(novel));
+    public ResponseEntity<ResponseDTO> createNovel(@RequestBody Novel novel, @AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(novelService.createNovel(novel, userDetails));
     }
 
     // ? Update a novel
@@ -76,6 +85,21 @@ public class NovelController {
             @RequestParam(defaultValue = "2") int pageSize
     ) {
         return ResponseEntity.ok(novelService.filterNovels(requestDTO, page, pageSize));
+    }
+
+
+    //? Approving a novel by the admin
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/approve/{novelId}")
+    public ResponseEntity<ResponseDTO> approveNovel(@PathVariable String novelId) {
+        return ResponseEntity.ok(novelService.approveNovel(novelId));
+    }
+
+    //? Rejecting a novel by the admin
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/reject/{novelId}")
+    public ResponseEntity<ResponseDTO> rejectNovel(@PathVariable String novelId) {
+        return ResponseEntity.ok(novelService.rejectNovel(novelId));
     }
 
 }
