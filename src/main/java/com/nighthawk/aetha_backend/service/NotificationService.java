@@ -8,11 +8,13 @@ import com.nighthawk.aetha_backend.repository.AuthUserRepository;
 import com.nighthawk.aetha_backend.repository.NotificationRepository;
 import com.nighthawk.aetha_backend.utils.VarList;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -32,22 +34,15 @@ public class NotificationService {
     @Autowired
     private AuthUserRepository userRepository;
 
+    @Autowired
+    private ModelMapper modelMapper;
+
     //? Creates a notification
     //? Depending on the type, must send an email as well
-    public boolean createNotification(NotificationDTO notification) {
+    public boolean createNotification(NotificationDTO notificationDTO) {
 
         try {
-            Notification newNotification = new Notification();
-            newNotification.setType(notification.getType());
-            newNotification.setSubject(notification.getSubject());
-            newNotification.setMessage(notification.getMessage());
-            newNotification.setSeen(notification.getSeen());
-            newNotification.setLink(notification.getLink());
-
-            //? Getting the recipient from the email via user repository
-            newNotification.setRecipient(userRepository.findByEmail(notification.getRecipient()).orElseThrow(() -> new RuntimeException("User not found")));
-
-            notificationRepository.save(newNotification);
+            notificationRepository.save(modelMapper.map(notificationDTO, Notification.class));
 
             logger.log(Level.FINE, "Notification created successfully");
 

@@ -8,8 +8,10 @@ import com.nighthawk.aetha_backend.utils.StatusList;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public interface NovelRepository extends MongoRepository<Novel, String> {
+    List<Novel> findByAuthor(AuthUser author);
     Page<Novel> findByAuthor(AuthUser author, Pageable pageable);
     Page<Novel> findByTitle(String title, Pageable pageable);
     long countByStatus(StatusList status);
