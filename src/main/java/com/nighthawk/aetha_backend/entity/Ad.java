@@ -27,7 +27,7 @@ public class Ad {
     private Boolean isActive;
     private String imageUrl;
     private Double budget;
-    private Integer pricePlan;
+    private String pricePlan;
     private String campaignType;
 
     // Additional fields for tracking metrics

@@ -18,7 +18,7 @@ public class AdDTO {
     private Boolean isActive;
     private String imageUrl;
     private Double budget;
-    private Integer pricePlan;
+    private String pricePlan;
     private String campaignType;
 
     // Creator information

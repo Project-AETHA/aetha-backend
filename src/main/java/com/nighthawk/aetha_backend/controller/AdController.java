@@ -25,7 +25,7 @@ public class AdController {
 
     @PostMapping("/create")
     public ResponseEntity<ResponseDTO> createAd(
-            @ModelAttribute AdDTO adDTO,
+            @RequestBody AdDTO adDTO,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
         return new ResponseEntity<>(adService.createAd(adDTO, userDetails), HttpStatus.OK);

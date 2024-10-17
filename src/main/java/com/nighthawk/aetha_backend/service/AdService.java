@@ -169,42 +169,65 @@ public class AdService {
 
     @Transactional
     public ResponseDTO updateAd(String id, AdDTO adDTO, UserDetails userDetails) {
+        ResponseDTO responseDTO = new ResponseDTO();
         Ad existingAd = adRepository.findById(id).orElse(null);
         AuthUser user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
 
         if (existingAd == null) {
             responseDTO.setCode(VarList.RSP_FAIL);
             responseDTO.setMessage("Ad not found");
-        } else if (user == null) {
+            return responseDTO;
+        }
+
+        if (user == null) {
             responseDTO.setCode(VarList.RSP_TOKEN_INVALID);
             responseDTO.setMessage("User not found");
-        } else if (existingAd.getCreator().getId().equals(user.getId())) {
-            try {
-                existingAd.setTitle(adDTO.getTitle());
-                existingAd.setContent(adDTO.getContent());
-                existingAd.setExpiresAt(adDTO.getExpiresAt());
-                existingAd.setBudget(adDTO.getBudget());
-                existingAd.setPricePlan(adDTO.getPricePlan());
-                existingAd.setCampaignType(adDTO.getCampaignType());
-                existingAd.setImageUrl(adDTO.getImageUrl());
+            return responseDTO;
+        }
 
-                
-                
-
-                Ad updatedAd = adRepository.save(existingAd);
-                responseDTO.setCode(VarList.RSP_SUCCESS);
-                responseDTO.setMessage("Ad updated successfully");
-                responseDTO.setContent(modelMapper.map(updatedAd, AdDTO.class));
-            } catch (Exception e) {
-                responseDTO.setCode(VarList.RSP_ERROR);
-                responseDTO.setMessage("Error updating ad");
-                responseDTO.setContent(null);
-            }
-        } else {
+        // Check if the user is the creator of the ad
+        if (!existingAd.getCreator().getId().equals(user.getId())) {
             responseDTO.setCode(VarList.RSP_FAIL);
             responseDTO.setMessage("You don't have permission to update this ad");
+            return responseDTO;
+        }
+
+        // Update fields if they are provided in the DTO
+        if (adDTO.getTitle() != null) {
+            existingAd.setTitle(adDTO.getTitle());
+        }
+        if (adDTO.getContent() != null) {
+            existingAd.setContent(adDTO.getContent());
+        }
+        if (adDTO.getExpiresAt() != null) {
+            existingAd.setExpiresAt(adDTO.getExpiresAt());
+        }
+        if (adDTO.getBudget() != null) {
+            existingAd.setBudget(adDTO.getBudget());
+        }
+        if (adDTO.getPricePlan() != null) {
+            existingAd.setPricePlan(adDTO.getPricePlan());
+        }
+        if (adDTO.getCampaignType() != null) {
+            existingAd.setCampaignType(adDTO.getCampaignType());
+        }
+        if (adDTO.getImageUrl() != null) {
+            existingAd.setImageUrl(adDTO.getImageUrl());
+        }
+
+        try {
+            Ad updatedAd = adRepository.save(existingAd);
+            responseDTO.setCode(VarList.RSP_SUCCESS);
+            responseDTO.setMessage("Ad updated successfully");
+            responseDTO.setContent(modelMapper.map(updatedAd, AdDTO.class));
+        } catch (Exception e) {
+            responseDTO.setCode(VarList.RSP_ERROR);
+            responseDTO.setMessage("Error updating ad");
+            responseDTO.setContent(null);
         }
 
         return responseDTO;
     }
+
+
 }
