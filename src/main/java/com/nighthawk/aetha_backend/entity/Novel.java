@@ -45,6 +45,7 @@ public class Novel {
     private List<ContentWarnings> contentWarning;
     private Date manualReleaseDate;
     private List<Review> reviews;
+    private Float rating = 0.0f;
 
     //? Default status is PENDING, after admin approval the status will be changed to PUBLISHED
     private ContentStatus status = ContentStatus.PENDING;
