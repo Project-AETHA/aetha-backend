@@ -69,13 +69,19 @@ public class AdService {
             }
 
 
-            if(!errors.isEmpty()) {
-                throw new Exception("Validation failed");
+            if(errors.isEmpty()) {
+                responseDTO.setCode(VarList.RSP_SUCCESS);
+                responseDTO.setMessage("Ad created successfully");
+                responseDTO.setContent(adRepository.save(newAd));
+            } else {
+                responseDTO.setCode(VarList.RSP_VALIDATION_FAILED);
+                responseDTO.setMessage("Validation failed");
+                responseDTO.setContent(newAd);
+                responseDTO.setErrors(errors);
             }
 
-            responseDTO.setCode(VarList.RSP_SUCCESS);
-            responseDTO.setMessage("Ad created successfully");
-            responseDTO.setContent(adRepository.save(newAd));
+
+
 
         } catch (Exception e) {
             responseDTO.setCode(VarList.RSP_ERROR);
@@ -87,16 +93,33 @@ public class AdService {
         return responseDTO;
     }
 
-    public Ad findAdById(String id) {
-        return adRepository.findById(id).orElse(null);
+    public ResponseDTO findAdById(String id) {
+        Ad ad = adRepository.findById(id).orElse(null);
+
+        if(ad == null) {
+            responseDTO.setCode(VarList.RSP_FAIL);
+            responseDTO.setMessage("Ad not found");
+            responseDTO.setContent(null);
+        } else {
+            responseDTO.setCode(VarList.RSP_SUCCESS);
+            responseDTO.setMessage("Ad found");
+            responseDTO.setContent(ad);
+        }
+
+        return responseDTO;
     }
 
-    public List<AdDTO> findAllAds() {
+    public ResponseDTO findAllAds() {
         List<Ad> ads = adRepository.findAll();
-
-        return ads.stream()
+        List<AdDTO> adDTOs = ads.stream()
                 .map(ad -> modelMapper.map(ad, AdDTO.class))
                 .collect(Collectors.toList());
+
+        responseDTO.setCode(VarList.RSP_SUCCESS);
+        responseDTO.setMessage("All ads");
+        responseDTO.setContent(adDTOs);
+
+        return responseDTO;
     }
 
     public ResponseDTO findMyAds(UserDetails userDetails) {
