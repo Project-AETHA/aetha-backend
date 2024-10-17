@@ -1,18 +1,21 @@
 package com.nighthawk.aetha_backend.service;
 
+import com.nighthawk.aetha_backend.dto.AdDTO;
 import com.nighthawk.aetha_backend.dto.ResponseDTO;
 import com.nighthawk.aetha_backend.entity.Ad;
 import com.nighthawk.aetha_backend.entity.AuthUser;
 import com.nighthawk.aetha_backend.repository.AdRepository;
 import com.nighthawk.aetha_backend.repository.AuthUserRepository;
 import com.nighthawk.aetha_backend.utils.VarList;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
-import java.util.List;
+import java.io.File;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class AdService {
@@ -26,159 +29,182 @@ public class AdService {
     @Autowired
     private ResponseDTO responseDTO;
 
-    private AuthUser validateUser(UserDetails userDetails) {
-        if (userDetails == null) {
-            return null;
+    @Autowired
+    private ModelMapper modelMapper;
+
+    @Transactional
+    public ResponseDTO createAd(AdDTO adDTO, UserDetails userDetails) {
+        AuthUser user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
+        Ad newAd = new Ad();
+        HashMap<String, String> errors = new HashMap<>();
+
+        try {
+            if(user == null) {
+                errors.put("userDetails", "User not found");
+                throw new Exception("User not found");
+            }
+
+
+            newAd.setCreator(user);
+            newAd.setCreatedAt(new Date());
+            newAd.setTitle(adDTO.getTitle());
+            newAd.setContent(adDTO.getContent());
+            newAd.setExpiresAt(adDTO.getExpiresAt());
+            newAd.setIsActive(true);
+            newAd.setBudget(adDTO.getBudget());
+            newAd.setPricePlan(adDTO.getPricePlan());
+            newAd.setCampaignType(adDTO.getCampaignType());
+            newAd.setImageUrl(adDTO.getImageUrl());
+
+            if (adDTO.getTitle() == null || adDTO.getTitle().isEmpty()) {
+                errors.put("title", "Title is required");
+            }
+
+            if (adDTO.getContent() == null || adDTO.getContent().isEmpty()) {
+                errors.put("content", "Content is required");
+            }
+
+            if (adDTO.getBudget() == null || adDTO.getBudget() <= 0) {
+                errors.put("budget", "Budget must be greater than zero");
+            }
+
+
+            if(!errors.isEmpty()) {
+                throw new Exception("Validation failed");
+            }
+
+            responseDTO.setCode(VarList.RSP_SUCCESS);
+            responseDTO.setMessage("Ad created successfully");
+            responseDTO.setContent(adRepository.save(newAd));
+
+        } catch (Exception e) {
+            responseDTO.setCode(VarList.RSP_ERROR);
+            responseDTO.setMessage(e.getMessage());
+            responseDTO.setContent(null);
+            responseDTO.setErrors(errors);
         }
-        return userRepository.findByEmail(userDetails.getUsername()).orElse(null);
+
+        return responseDTO;
     }
 
-    public ResponseDTO createAd(Ad ad, UserDetails userDetails) {
+    public Ad findAdById(String id) {
+        return adRepository.findById(id).orElse(null);
+    }
+
+    public List<AdDTO> findAllAds() {
+        List<Ad> ads = adRepository.findAll();
+
+        return ads.stream()
+                .map(ad -> modelMapper.map(ad, AdDTO.class))
+                .collect(Collectors.toList());
+    }
+
+    public ResponseDTO findMyAds(UserDetails userDetails) {
         AuthUser user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
 
-        if(user != null) {
+        if(user == null) {
+            responseDTO.setCode(VarList.RSP_TOKEN_INVALID);
+            responseDTO.setMessage("User not found");
+            responseDTO.setContent(null);
+        } else {
             try {
-                ad.setCreator(user);
-                ad.setCreatedAt(new Date());
-                ad.setIsActive(true);
-                Ad savedAd = adRepository.save(ad);
+                List<Ad> ads = adRepository.findByCreator(user);
+
+                List<AdDTO> myAds = ads.stream()
+                        .map(ad -> modelMapper.map(ad, AdDTO.class))
+                        .collect(Collectors.toList());
+
                 responseDTO.setCode(VarList.RSP_SUCCESS);
-                responseDTO.setMessage("Ad created successfully");
-                responseDTO.setContent(savedAd);
+                responseDTO.setContent(myAds);
+
+                if(myAds.isEmpty()) responseDTO.setMessage("No ads found");
+                else responseDTO.setMessage("Ads found");
+
             } catch (Exception e) {
                 responseDTO.setCode(VarList.RSP_ERROR);
-                responseDTO.setMessage("Error while creating ad: " + e.getMessage());
+                responseDTO.setMessage("Error fetching ads");
                 responseDTO.setContent(null);
             }
-        } else {
-            responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
-            responseDTO.setMessage("User not found or not authenticated");
-            responseDTO.setContent(null);
         }
+
         return responseDTO;
     }
 
-    public ResponseDTO findAdById(String id, UserDetails userDetails) {
-
-        AuthUser user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
-
-        if (user == null) {
-            responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
-            responseDTO.setMessage("User not found or not authenticated");
-            responseDTO.setContent(null);
-            return responseDTO;
-        }
-
-        Ad ad = adRepository.findById(id).orElse(null);
-        if(ad != null) {
-            responseDTO.setCode(VarList.RSP_SUCCESS);
-            responseDTO.setMessage("Ad found");
-            responseDTO.setContent(ad);
-        } else {
-            responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
-            responseDTO.setMessage("Ad not found");
-            responseDTO.setContent(null);
-        }
-        return responseDTO;
-    }
-
-    public ResponseDTO findAllAds(UserDetails userDetails) {
-        AuthUser user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
-        if (user == null) {
-            responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
-            responseDTO.setMessage("User not found or not authenticated");
-            responseDTO.setContent(null);
-            return responseDTO;
-        }
-
-        List<Ad> ads = adRepository.findAll();
-        responseDTO.setCode(VarList.RSP_SUCCESS);
-        responseDTO.setMessage("All ads retrieved");
-        responseDTO.setContent(ads);
-        return responseDTO;
-    }
+//    public List<AdDTO> searchAds(RequestDTO requestDTO) {
+//        return adRepository.searchAds(
+//                        requestDTO.getSearchTerm(),
+//                        requestDTO.getCampaignType()
+//                ).stream()
+//                .map(ad -> modelMapper.map(ad, AdDTO.class))
+//                .collect(Collectors.toList());
+//    }
 
     @Transactional
     public ResponseDTO deleteAd(String id, UserDetails userDetails) {
+        Ad ad = adRepository.findById(id).orElse(null);
         AuthUser user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
 
-        if (user == null) {
-            responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
-            responseDTO.setMessage("User not found or not authenticated");
-            responseDTO.setContent(null);
-            return responseDTO;
-        }
-
-        Ad ad = adRepository.findById(id).orElse(null);
         if (ad == null) {
-            responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
+            responseDTO.setCode(VarList.RSP_FAIL);
             responseDTO.setMessage("Ad not found");
-            responseDTO.setContent(null);
-            return responseDTO;
-        }
-
-        if(ad.getCreator().getId().equals(user.getId()) || user.getRole().equals("ADMIN")) {
-            try {
-                adRepository.delete(ad);
-                responseDTO.setCode(VarList.RSP_SUCCESS);
-                responseDTO.setMessage("Ad deleted successfully");
-                responseDTO.setContent(ad);
-            } catch (Exception e) {
-                responseDTO.setCode(VarList.RSP_ERROR);
-                responseDTO.setMessage("Error while deleting ad: " + e.getMessage());
-                responseDTO.setContent(null);
+        } else if (user == null) {
+            responseDTO.setCode(VarList.RSP_TOKEN_INVALID);
+            responseDTO.setMessage("User not found");
+        } else if (ad.getCreator().getId().equals(user.getId()) || user.getRole().equals("ADMIN")) {
+            if(ad.getImageUrl() != null) {
+                File file = new File("public" + ad.getImageUrl());
+                if(file.exists()) file.delete();
             }
+
+            adRepository.delete(ad);
+            responseDTO.setCode(VarList.RSP_SUCCESS);
+            responseDTO.setMessage("Ad deleted successfully");
         } else {
             responseDTO.setCode(VarList.RSP_FAIL);
-            responseDTO.setMessage("Not authorized to delete this ad");
-            responseDTO.setContent(null);
+            responseDTO.setMessage("You don't have permission to delete this ad");
         }
+
         return responseDTO;
     }
 
     @Transactional
-    public ResponseDTO updateAd(String id, Ad ad, UserDetails userDetails) {
-        AuthUser user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
-        if (user == null) {
-            responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
-            responseDTO.setMessage("User not found or not authenticated");
-            responseDTO.setContent(null);
-            return responseDTO;
-        }
-
+    public ResponseDTO updateAd(String id, AdDTO adDTO, UserDetails userDetails) {
         Ad existingAd = adRepository.findById(id).orElse(null);
-        if (existingAd == null) {
-            responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
-            responseDTO.setMessage("Ad not found");
-            responseDTO.setContent(null);
-            return responseDTO;
-        }
+        AuthUser user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
 
-        if(existingAd.getCreator().getId().equals(user.getId())) {
+        if (existingAd == null) {
+            responseDTO.setCode(VarList.RSP_FAIL);
+            responseDTO.setMessage("Ad not found");
+        } else if (user == null) {
+            responseDTO.setCode(VarList.RSP_TOKEN_INVALID);
+            responseDTO.setMessage("User not found");
+        } else if (existingAd.getCreator().getId().equals(user.getId())) {
             try {
-                updateAdFields(existingAd, ad);
+                existingAd.setTitle(adDTO.getTitle());
+                existingAd.setContent(adDTO.getContent());
+                existingAd.setExpiresAt(adDTO.getExpiresAt());
+                existingAd.setBudget(adDTO.getBudget());
+                existingAd.setPricePlan(adDTO.getPricePlan());
+                existingAd.setCampaignType(adDTO.getCampaignType());
+                existingAd.setImageUrl(adDTO.getImageUrl());
+
+                
+                
+
                 Ad updatedAd = adRepository.save(existingAd);
                 responseDTO.setCode(VarList.RSP_SUCCESS);
                 responseDTO.setMessage("Ad updated successfully");
-                responseDTO.setContent(updatedAd);
+                responseDTO.setContent(modelMapper.map(updatedAd, AdDTO.class));
             } catch (Exception e) {
                 responseDTO.setCode(VarList.RSP_ERROR);
-                responseDTO.setMessage("Error while updating ad: " + e.getMessage());
+                responseDTO.setMessage("Error updating ad");
                 responseDTO.setContent(null);
             }
         } else {
             responseDTO.setCode(VarList.RSP_FAIL);
-            responseDTO.setMessage("Not authorized to update this ad");
-            responseDTO.setContent(null);
+            responseDTO.setMessage("You don't have permission to update this ad");
         }
-        return responseDTO;
-    }
 
-    private void updateAdFields(Ad existingAd, Ad newAd) {
-        if (newAd.getTitle() != null) existingAd.setTitle(newAd.getTitle());
-        if (newAd.getContent() != null) existingAd.setContent(newAd.getContent());
-        if (newAd.getImageUrl() != null) existingAd.setImageUrl(newAd.getImageUrl());
-        if (newAd.getExpiresAt() != null) existingAd.setExpiresAt(newAd.getExpiresAt());
-        if (newAd.getIsActive() != null) existingAd.setIsActive(newAd.getIsActive());
+        return responseDTO;
     }
 }
