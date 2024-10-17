@@ -1,12 +1,20 @@
 package com.nighthawk.aetha_backend.service;
 
+import com.nighthawk.aetha_backend.dto.NotificationDTO;
+import com.nighthawk.aetha_backend.dto.NovelDTO;
 import com.nighthawk.aetha_backend.dto.RequestDTO;
 import com.nighthawk.aetha_backend.dto.ResponseDTO;
 import com.nighthawk.aetha_backend.entity.AuthUser;
+import com.nighthawk.aetha_backend.entity.Genres;
 import com.nighthawk.aetha_backend.entity.Novel;
+import com.nighthawk.aetha_backend.entity.Tags;
 import com.nighthawk.aetha_backend.repository.AuthUserRepository;
 import com.nighthawk.aetha_backend.repository.NovelRepository;
 import com.nighthawk.aetha_backend.utils.VarList;
+import com.nighthawk.aetha_backend.utils.predefined.ContentStatus;
+import com.nighthawk.aetha_backend.utils.predefined.ContentWarnings;
+import com.nighthawk.aetha_backend.utils.predefined.NotificationCategory;
+import com.nighthawk.aetha_backend.utils.predefined.NotifyType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -14,9 +22,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.View;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -28,24 +37,79 @@ public class NovelService {
     @Autowired
     private NovelRepository novelRepository;
     @Autowired
-    private View error;
-    @Autowired
     private AuthUserRepository authUserRepository;
     @Autowired
     private MongoTemplate mongoTemplate;
+    @Autowired
+    private NotificationService notificationService;
 
-    public ResponseDTO createNovel(Novel novel) {
+    public ResponseDTO createNovel(NovelDTO novelDTO, UserDetails userDetails) {
 
         HashMap<String, String> errors = new HashMap<>();
+        Novel novel = new Novel();
 
         try {
             //? Validation logic
-            if(novel.getTitle().isEmpty()) errors.put("title", "Title cannot be empty");
-            if(novel.getSynopsis().isEmpty()) errors.put("synopsis", "Synopsis cannot be empty");
-            if(novel.getDescription().isEmpty()) errors.put("description", "Description cannot be empty");
-            if(novel.getCoverImage().isEmpty()) errors.put("coverImage", "Cover image cannot be empty");
-            if(novel.getGenre().isEmpty()) errors.put("genre", "Genre cannot be empty");
-            if(novel.getContentWarning().isEmpty()) errors.put("contentWarning", "Content warnings cannot be empty");
+            if(novelDTO.getTitle() == null || novelDTO.getTitle().isEmpty()) errors.put("title", "Title cannot be empty");
+            else novel.setTitle(novelDTO.getTitle());
+
+            if(novelDTO.getSynopsis() == null || novelDTO.getSynopsis().isEmpty()) errors.put("synopsis", "Synopsis cannot be empty");
+            else novel.setSynopsis(novelDTO.getSynopsis());
+
+            if(novelDTO.getDescription() == null || novelDTO.getDescription().isEmpty()) errors.put("description", "Description cannot be empty");
+            else novel.setDescription(novelDTO.getDescription());
+
+            if(novelDTO.getCoverImage() == null || novelDTO.getCoverImage().isEmpty()) errors.put("coverImage", "Cover image cannot be empty");
+            else novel.setCoverImage(novelDTO.getCoverImage());
+
+            if(novelDTO.getGenres() == null) errors.put("genre", "Genre cannot be empty");
+            else {
+                List<Genres> genreList = new ArrayList<>();
+                for (String genreString : novelDTO.getGenres()) {
+                    String trimmedGenre = genreString.trim().toUpperCase();
+                    try {
+                        Genres genre = Genres.valueOf(trimmedGenre);
+                        genreList.add(genre);
+                    } catch (IllegalArgumentException e) {
+                        errors.put("genres", "Invalid genre: " + trimmedGenre);
+                    }
+                }
+                novel.setGenres(genreList);
+            }
+
+            if(novelDTO.getTags() != null) {
+                List<Tags> tagsList = new ArrayList<>();
+                for (String tagString : novelDTO.getTags()) {
+                    String trimmedTag = tagString.trim().toUpperCase();
+                    try {
+                        Tags tag = Tags.valueOf(trimmedTag);
+                        tagsList.add(tag);
+                    } catch (IllegalArgumentException e) {
+                        errors.put("tags", "Invalid tag: " + trimmedTag);
+                    }
+                }
+                novel.setTags(tagsList);
+            }
+
+            if(novelDTO.getContentWarning() == null) errors.put("contentWarning", "Content warnings cannot be empty");
+            else {
+                List<ContentWarnings> warningsList = new ArrayList<>();
+                for (String warningString : novelDTO.getContentWarning()) {
+                    String trimmedWarning = warningString.trim().toUpperCase();
+                    try {
+                        ContentWarnings warning = ContentWarnings.valueOf(trimmedWarning);
+                        warningsList.add(warning);
+                    } catch (IllegalArgumentException e) {
+                        errors.put("contentWarning", "Invalid warning: " + trimmedWarning);
+                    }
+                }
+                novel.setContentWarning(warningsList);
+            }
+
+            novel.setAuthor(authUserRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new RuntimeException("Author not found")));
+            novelDTO.setStatus(ContentStatus.PENDING);
+
+            //? TODO - Manual release date
 
             if(errors.isEmpty()) {
                 responseDTO.setCode(VarList.RSP_SUCCESS);
@@ -59,7 +123,7 @@ public class NovelService {
             }
         } catch (Exception e) {
             responseDTO.setCode(VarList.RSP_ERROR);
-            responseDTO.setMessage("Error Occured");
+            responseDTO.setMessage("Error Occurred");
             responseDTO.setContent(e.getMessage());
         }
 
@@ -169,6 +233,89 @@ public class NovelService {
 
         //! Should include a pre-check about any subscriptions before deleting a book
         //? Deletion logic
+
+        return responseDTO;
+    }
+
+    public ResponseDTO getNovelById(String novelId) {
+        try {
+            responseDTO.setCode(VarList.RSP_SUCCESS);
+            responseDTO.setMessage("Novel fetched successfully");
+            responseDTO.setContent(novelRepository.findById(novelId).orElseThrow(() -> new RuntimeException("Novel not found")));
+        } catch (Exception e) {
+            responseDTO.setCode(VarList.RSP_ERROR);
+            responseDTO.setMessage("Error fetching novel");
+            responseDTO.setContent(e.getMessage());
+        }
+
+        return responseDTO;
+    }
+
+    public ResponseDTO approveNovel(String novelId) {
+        try {
+            Novel novel = novelRepository.findById(novelId).orElseThrow(() -> new RuntimeException("Novel not found"));
+            novel.setStatus(ContentStatus.APPROVED);
+            novelRepository.save(novel);
+
+            responseDTO.setCode(VarList.RSP_SUCCESS);
+            responseDTO.setMessage("Novel approved successfully");
+            responseDTO.setContent(novel);
+        } catch (Exception e) {
+            responseDTO.setCode(VarList.RSP_ERROR);
+            responseDTO.setMessage("Error approving novel");
+            responseDTO.setContent(e.getMessage());
+        }
+
+        return responseDTO;
+    }
+
+    public ResponseDTO rejectNovel(String novelId) {
+        try {
+
+            //? Updating the novel's status
+            Novel novel = novelRepository.findById(novelId).orElseThrow(() -> new RuntimeException("Novel not found"));
+            novel.setStatus(ContentStatus.REJECTED);
+            novelRepository.save(novel);
+
+            //? Sending notification to the author about the rejection
+            NotificationDTO notification = new NotificationDTO();
+            notification.setType(NotifyType.PUSH_NOTIFICATION);
+            notification.setCategory(NotificationCategory.UPDATE);
+            notification.setSubject("Novel Rejected");
+            notification.setMessage("The novel " + novel.getTitle() + " has been rejected");
+            notification.setLink("/author/novels/" + novel.getId());
+            notification.setRecipient(novel.getAuthor());
+
+
+            if(!notificationService.createNotification(notification)) {
+                throw new RuntimeException("Error sending notification");
+            }
+
+            responseDTO.setCode(VarList.RSP_SUCCESS);
+            responseDTO.setMessage("Novel declined successfully");
+            responseDTO.setContent(novel);
+        } catch (Exception e) {
+            responseDTO.setCode(VarList.RSP_ERROR);
+            responseDTO.setMessage("Error rejecting novel");
+            responseDTO.setContent(e.getMessage());
+        }
+
+        return responseDTO;
+    }
+
+    public ResponseDTO getMyNovels(UserDetails userDetails) {
+        try {
+            AuthUser user = authUserRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new RuntimeException("User not found"));
+            List<Novel> novels = novelRepository.findByAuthor(user);
+
+            responseDTO.setCode(VarList.RSP_SUCCESS);
+            responseDTO.setMessage("Novels fetched successfully");
+            responseDTO.setContent(novels);
+        } catch (Exception e) {
+            responseDTO.setCode(VarList.RSP_ERROR);
+            responseDTO.setMessage("Error fetching novels");
+            responseDTO.setContent(e.getMessage());
+        }
 
         return responseDTO;
     }
