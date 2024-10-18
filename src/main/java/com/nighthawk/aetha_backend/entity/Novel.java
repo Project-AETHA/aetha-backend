@@ -44,7 +44,9 @@ public class Novel {
     // ? Not sure of the content
     private List<ContentWarnings> contentWarning;
     private Date manualReleaseDate;
-    private List<Review> reviews;
+
+    //* Reviews and Chapters will reference the novel, so we don't need to store them here
+
     private Float rating = 0.0f;
 
     //? Default status is PENDING, after admin approval the status will be changed to PUBLISHED
@@ -53,4 +55,8 @@ public class Novel {
 
     //? Published datetime will be added when the admin has approved and published the novel
     private LocalDate publishedAt;
+
+    //! Data for analytics
+    private Integer views = 0;
+    private Integer clicks = 0;
 }

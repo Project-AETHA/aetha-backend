@@ -6,5 +6,6 @@ public enum ContentStatus {
     REJECTED,
     DELETED,
     DRAFT,
-    PUBLISHED
+    PUBLISHED,
+    COMPLETED
 }
