@@ -35,7 +35,6 @@ public class Chapter {
 
     @CreatedDate
     private LocalDate createdAt = new Date().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-    private Boolean isVisible = false;
-
+    private Boolean isVisible = true;
 
 }

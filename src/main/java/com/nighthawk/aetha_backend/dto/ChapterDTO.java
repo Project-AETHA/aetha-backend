@@ -19,8 +19,9 @@ public class ChapterDTO {
 
     private String id;
 
-    @DBRef(lazy = true)
-    private Novel novel;
+    //? Novel details and the user details is unnecessary when we are only showing the chapters
+//    @DBRef(lazy = true)
+//    private Novel novel;
 
     private String title;
     private Integer chapterNumber;

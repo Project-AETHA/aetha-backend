@@ -7,5 +7,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.List;
 
 public interface ChapterRepository extends MongoRepository<Chapter, String> {
-    List<Chapter> findAllByNovel(Novel novel);
+    List<Chapter> findAllByNovelAndStatusAndIsVisible(Novel novel, String status, Boolean isVisible);
+    List<Chapter> findByNovel(Novel novel);
 }
