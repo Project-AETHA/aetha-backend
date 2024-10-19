@@ -6,12 +6,15 @@ import com.nighthawk.aetha_backend.entity.Genres;
 import com.nighthawk.aetha_backend.entity.Novel;
 import com.nighthawk.aetha_backend.entity.Tags;
 import com.nighthawk.aetha_backend.repository.AuthUserRepository;
+import com.nighthawk.aetha_backend.repository.ChapterRepository;
 import com.nighthawk.aetha_backend.repository.NovelRepository;
 import com.nighthawk.aetha_backend.utils.VarList;
 import com.nighthawk.aetha_backend.utils.predefined.ContentStatus;
 import com.nighthawk.aetha_backend.utils.predefined.ContentWarnings;
 import com.nighthawk.aetha_backend.utils.predefined.NotificationCategory;
 import com.nighthawk.aetha_backend.utils.predefined.NotifyType;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -39,6 +42,10 @@ public class NovelService {
     private MongoTemplate mongoTemplate;
     @Autowired
     private NotificationService notificationService;
+    @Autowired
+    private ChapterRepository chapterRepository;
+    @Autowired
+    private ModelMapper modelMapper;
 
     public ResponseDTO createNovel(NovelDTO novelDTO, UserDetails userDetails) {
 
@@ -323,6 +330,10 @@ public class NovelService {
             Novel novel = novelRepository.findById(novelId).orElseThrow(() -> new RuntimeException("Novel not found"));
 
             // TODO - Implement the logic to get the chapters and reviews
+            List<ChapterDTO> chapters = modelMapper.map(
+                    chapterRepository.findAllByNovelAndStatusAndIsVisible(novel, "COMPLETED", true),
+                    new TypeToken<List<ChapterDTO>>(){}.getType() //* To a list of ChapterDTO
+            );
 
             responseDTO.setCode(VarList.RSP_SUCCESS);
             responseDTO.setMessage("Data found");
@@ -330,6 +341,7 @@ public class NovelService {
             //? A DTO that contains the novel, chapters and reviews
             NovelChapterOverview novelChapterOverview = new NovelChapterOverview();
             novelChapterOverview.setNovel(novel);
+            novelChapterOverview.setChapters(chapters);
             // TODO - Add the reviews and chapters later
 
             responseDTO.setContent(novelChapterOverview);

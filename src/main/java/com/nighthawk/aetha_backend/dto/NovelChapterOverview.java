@@ -15,7 +15,7 @@ import java.util.List;
 public class NovelChapterOverview {
 
     private Novel novel;
-    private List<String> chapters;
+    private List<ChapterDTO> chapters;
     private List<Review> reviews;
 
 }
