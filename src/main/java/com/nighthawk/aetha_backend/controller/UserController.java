@@ -3,16 +3,12 @@ package com.nighthawk.aetha_backend.controller;
 import com.nighthawk.aetha_backend.dto.ResponseDTO;
 import com.nighthawk.aetha_backend.entity.AuthUser;
 import com.nighthawk.aetha_backend.service.UserService;
-import com.nighthawk.aetha_backend.utils.VarList;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @CrossOrigin
 @RestController
@@ -33,12 +29,14 @@ public class UserController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{email}")
-    public ResponseEntity<ResponseDTO> findByEmail(@PathVariable String email){
-
+    public ResponseEntity<ResponseDTO> findByEmail(@PathVariable String email) {
         return ResponseEntity.ok(userService.findByEmail(email));
     }
 
-
+    @GetMapping
+    public ResponseEntity<ResponseDTO> getMyDetails(@AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(userService.getMyDetails(userDetails));
+    }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/update/{email}")
@@ -50,23 +48,19 @@ public class UserController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/delete/{email}")
-    public ResponseEntity<ResponseDTO> deleteUser   (@PathVariable String email) {
-
-
+    public ResponseEntity<ResponseDTO> deleteUser (@PathVariable String email) {
         return ResponseEntity.ok(userService.deleteUser(email));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/add-user")
     public ResponseEntity<ResponseDTO> addUser (@RequestBody AuthUser user){
-
         return ResponseEntity.ok(userService.addUser(user));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/disable/{email}")
     public ResponseEntity<ResponseDTO> disableUser (@PathVariable String email){
-
         return ResponseEntity.ok(userService.disableUser(email));
     }
 

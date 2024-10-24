@@ -12,6 +12,7 @@ import com.nighthawk.aetha_backend.utils.StatusList;
 import com.nighthawk.aetha_backend.utils.VarList;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -263,6 +264,26 @@ public class UserService {
           return responseDTO;
     }
 
+    public ResponseDTO getMyDetails(UserDetails userDetails) {
+        try {
+            AuthUser user = repository.findByEmail(userDetails.getUsername()).orElse(null);
 
+            if (user != null) {
+                responseDTO.setCode(VarList.RSP_SUCCESS);
+                responseDTO.setMessage("User found");
+                responseDTO.setContent(user);
+            } else {
+                responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
+                responseDTO.setMessage("User not found");
+                responseDTO.setContent(null);
+            }
+        } catch (Exception e) {
+            responseDTO.setCode(VarList.RSP_ERROR);
+            responseDTO.setMessage(e.getMessage());
+            responseDTO.setContent(null);
+        }
+
+        return responseDTO;
+    }
 }
 
