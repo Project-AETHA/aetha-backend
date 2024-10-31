@@ -342,7 +342,8 @@ public class NovelService {
             NovelChapterOverview novelChapterOverview = new NovelChapterOverview();
             novelChapterOverview.setNovel(novel);
             novelChapterOverview.setChapters(chapters);
-            // TODO - Add the reviews and chapters later
+            novelChapterOverview.setReviews(null);
+            // TODO - Add the reviews later
 
             responseDTO.setContent(novelChapterOverview);
 

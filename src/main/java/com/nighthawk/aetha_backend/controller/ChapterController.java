@@ -35,6 +35,12 @@ public class ChapterController {
     }
 
     //? Getting the chapter based on the chapter id
+    @GetMapping("/single")
+    public ResponseEntity<ResponseDTO> getChapterByNovelIdAndChapterNumber(@RequestParam String novelId, @RequestParam Integer chapterNumber) {
+        return ResponseEntity.ok(chapterService.getChapterByNovelIdAndChapterNumber(novelId, chapterNumber));
+    }
+
+    //? Getting the chapter based on the novel id and chapter number
     @GetMapping("/single/{chapterId}")
     public ResponseEntity<ResponseDTO> getChapterById(@PathVariable String chapterId) {
         return ResponseEntity.ok(chapterService.getChapterById(chapterId));

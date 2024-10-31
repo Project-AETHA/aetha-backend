@@ -58,6 +58,7 @@ spring:
 #            type:
 #              mapping: notification:com.nighthawk.aetha_backend.dto.NotificationDTO
     consumer:
+#      enabled: false
       group-id: my-group-id
       key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
@@ -85,6 +86,14 @@ env:
     urlEndpoint: "https://ik.imagekit.io/aetha"
 
 logging:
+  level:
+    org:
+      apache:
+        kafka: ERROR
+#      apache:
+#        kafka:
+#          clients:
+#            NetworkClient: ERROR
   file:
     name: logs/aetha_backend.log
   logback:

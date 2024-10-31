@@ -38,4 +38,6 @@ public class Chapter {
     private Boolean isVisible = true;
     private Boolean isPremium = false;
 
+    private int totalChapterCount;
+
 }

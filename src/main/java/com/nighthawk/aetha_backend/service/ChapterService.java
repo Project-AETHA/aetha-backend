@@ -232,4 +232,28 @@ public class ChapterService {
 
             return responseDTO;
     }
+
+    public ResponseDTO getChapterByNovelIdAndChapterNumber(String novelId, Integer chapterNumber) {
+        try {
+            Chapter chapter = chapterRepository.findByNovelIdAndChapterNumber(novelId, chapterNumber).orElseThrow(() -> new NoSuchElementException("Chapter not found"));
+            int totalChapterCount = chapterRepository.countChaptersByNovelIdAndIsVisibleAndStatus(novelId, true, String.valueOf(ContentStatus.COMPLETED));
+
+            chapter.setTotalChapterCount(totalChapterCount);
+
+            //? Setting up the responses
+            responseDTO.setCode(VarList.RSP_SUCCESS);
+            responseDTO.setMessage("Chapters fetched successfully");
+            responseDTO.setContent(chapter);
+        } catch (NoSuchElementException e) {
+            responseDTO.setCode(VarList.RSP_VALIDATION_FAILED);
+            responseDTO.setMessage(e.getMessage());
+            responseDTO.setContent(novelId);
+        } catch (Exception e) {
+            responseDTO.setCode(VarList.RSP_ERROR);
+            responseDTO.setMessage("Error occurred");
+            responseDTO.setContent(e.getMessage());
+        }
+
+        return responseDTO;
+    }
 }

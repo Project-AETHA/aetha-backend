@@ -46,6 +46,8 @@ public class SecurityConfig {
                                     "/api/files/**",
                                     "/api/books",
                                     "/api/ebooks/**", // TODO : Check this line
+                                    "/api/novels/**",
+                                    "/api/chapters/**",
                                     "/api/config/**"
                             )
                             .permitAll()
