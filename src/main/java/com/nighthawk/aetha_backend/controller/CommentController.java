@@ -1,28 +1,49 @@
 package com.nighthawk.aetha_backend.controller;
 
 import com.nighthawk.aetha_backend.dto.CommentDTO;
+import com.nighthawk.aetha_backend.dto.ResponseDTO;
 import com.nighthawk.aetha_backend.service.CommentService;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import com.nighthawk.aetha_backend.utils.VarList;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
-
 
 @RestController
 @RequestMapping("/api/comments")
 @CrossOrigin
 public class CommentController {
-    @Autowired
-    private CommentService commentService;
+
+    private final CommentService commentService;
+    private final ResponseDTO responseDTO;
+
+    public CommentController(CommentService commentService, ResponseDTO responseDTO) {
+        this.commentService = commentService;
+        this.responseDTO = responseDTO;
+    }
 
     @GetMapping("/getComment")
-    public List<CommentDTO> getComment() {
-        return commentService.getAllComments();
+    public ResponseEntity<ResponseDTO> getComment() {
+        ResponseDTO response = new ResponseDTO(); 
+        try {
+            response = commentService.getAllComments(); 
+        } catch (Exception e) {
+            response.setCode(VarList.RSP_ERROR);
+            response.setMessage("Error retrieving comments");
+            response.setContent(null);
+        }
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PostMapping("/saveComment")
-    public CommentDTO saveComment(@RequestBody CommentDTO commentDTO) {
-        return commentService.saveComment(commentDTO);
+    public ResponseEntity<ResponseDTO> saveComment(@RequestBody CommentDTO commentDTO) {
+        ResponseDTO response = new ResponseDTO(); 
+        try {
+            response = commentService.saveComment(commentDTO); 
+        } catch (Exception e) {
+            response.setCode(VarList.RSP_ERROR);
+            response.setMessage("Error saving comment");
+            response.setContent(null);
+        }
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
-
 }
