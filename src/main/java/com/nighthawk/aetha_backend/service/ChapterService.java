@@ -23,21 +23,27 @@ import java.util.NoSuchElementException;
 @Service
 public class ChapterService {
 
-    @Autowired
-    ResponseDTO responseDTO;
+
+    private ResponseDTO responseDTO;
+    private ChapterRepository chapterRepository;
+    private NovelRepository novelRepository;
+    private AuthUserRepository authUserRepository;
+    private ModelMapper modelMapper;
 
     @Autowired
-    ChapterRepository chapterRepository;
-
-    @Autowired
-    NovelRepository novelRepository;
-
-    @Autowired
-    AuthUserRepository authUserRepository;
-
-    @Autowired
-    ModelMapper modelMapper;
-
+    public ChapterService (
+            ResponseDTO responseDTO,
+            ChapterRepository chapterRepository,
+            NovelRepository novelRepository,
+            AuthUserRepository authUserRepository,
+            ModelMapper modelMapper
+    ) {
+        this.responseDTO = responseDTO;
+        this.chapterRepository = chapterRepository;
+        this.novelRepository = novelRepository;
+        this.authUserRepository = authUserRepository;
+        this.modelMapper = modelMapper;
+    }
 
     //* Getting all the chapters by the novelId given
     public ResponseDTO getAllChaptersByNovelIdAndStatusAndVisibility(String novelId) {
