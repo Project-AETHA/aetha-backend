@@ -31,4 +31,8 @@ public class RequestDTO {
 
     // ? Specific to Content
     private Date manualReleaseDate;
+
+    //? Comment
+    private String novel;
+    private String user;
 }
