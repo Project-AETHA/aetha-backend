@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -44,6 +45,7 @@ public class Novel {
     private Date manualReleaseDate;
     private List<Review> reviews;
     private StatusList status;
+    @CreatedDate
     private LocalDate createdAt;
     private LocalDate publishedAt;
 }

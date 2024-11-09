@@ -1,6 +1,7 @@
 package com.nighthawk.aetha_backend.entity;
 
 import lombok.Data;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -42,5 +43,6 @@ public class Poem {
     private List<String> comments;
     private Integer upvotes;
     private Integer downvotes;
+    @CreatedDate
     private LocalDate createdAt;
 }
