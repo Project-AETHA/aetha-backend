@@ -25,5 +25,10 @@ public class StatDTO {
     //weekly publishes barchart
     private  Map<DayOfWeek, Long> NovelCounts;
     private  Map<DayOfWeek, Long> PoemCounts;
+    private  Map<DayOfWeek, Long> ShortStoryCounts;
+
+    //monthly user Registration
+
+
 
 }
