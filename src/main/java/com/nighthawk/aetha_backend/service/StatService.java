@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -51,9 +53,16 @@ public class StatService {
             long totalComplaints = supportTicketRepository.count();
             long pendingNovelApprovals = novelRepository.countByStatus(StatusList.PENDING);
 
+            statDTO.setTotalUsers(totalUsers);
+            statDTO.setTotalComplaints(totalComplaints);
+            statDTO.setPendingNovelApprovals(pendingNovelApprovals);
+
             //complaints donut chart
             long completedComplaints = supportTicketRepository.countByStatus(StatusList.COMPLETED);
             long pendingComplaints = supportTicketRepository.countByStatus(StatusList.PENDING);
+
+            statDTO.setCompletedComplaints(completedComplaints);
+            statDTO.setPendingComplaints(pendingComplaints);
 
             //weekly publishes barchart
             // Date calculation: Get date ranges from yesterday to 7 days back
@@ -86,12 +95,33 @@ public class StatService {
             statDTO.setPoemCounts(poemCountsByDay);
 //            statDTO.setShortStoryCounts(shortStoryCountsByDay);
 
+            //user registration trend
+            LocalDate sixMonthsAgo = today.minusMonths(6);
 
-            statDTO.setTotalUsers(totalUsers);
-            statDTO.setTotalComplaints(totalComplaints);
-            statDTO.setPendingNovelApprovals(pendingNovelApprovals);
-            statDTO.setCompletedComplaints(completedComplaints);
-            statDTO.setPendingComplaints(pendingComplaints);
+            List<Map<String, Long>> cumulativeUserCounts = new ArrayList<>();
+
+            long cumulativeReaders = 0;
+            long cumulativeWriters = 0;
+
+            for(int i=0; i<6 ; i++){
+                LocalDate startOfMonth = sixMonthsAgo.plusMonths(i);
+                LocalDate endOfMonth = startOfMonth.plusMonths(1);
+
+                long readersCount = repository.countByCreatedAtBetweenAndRole(startOfMonth, endOfMonth, "READER");
+                long writersCount = repository.countByCreatedAtBetweenAndRole(startOfMonth, endOfMonth, "WRITER");
+
+                cumulativeReaders += readersCount;
+                cumulativeWriters += writersCount;
+
+                Map<String, Long> monthlyData = new HashMap<>();
+                monthlyData.put("month", Long.valueOf(startOfMonth.getMonthValue()));
+                monthlyData.put("year", Long.valueOf(startOfMonth.getYear()));
+                monthlyData.put("cumulativeReaders", cumulativeReaders);
+                monthlyData.put("cumulativeWriters", cumulativeWriters);
+
+                cumulativeUserCounts.add(monthlyData);
+            }
+
 
             responseDTO.setCode(VarList.RSP_SUCCESS);
             responseDTO.setMessage("Data fetched successfully");
