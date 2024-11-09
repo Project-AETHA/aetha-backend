@@ -3,16 +3,22 @@ package com.nighthawk.aetha_backend.service;
 import com.nighthawk.aetha_backend.dto.CommentDTO;
 import com.nighthawk.aetha_backend.dto.ResponseDTO;
 import com.nighthawk.aetha_backend.entity.Comment;
+import com.nighthawk.aetha_backend.entity.AuthUser;
+import com.nighthawk.aetha_backend.entity.Novel;
+import com.nighthawk.aetha_backend.repository.NovelRepository;
 import com.nighthawk.aetha_backend.repository.CommentRepository;
+import com.nighthawk.aetha_backend.repository.AuthUserRepository;
 import com.nighthawk.aetha_backend.utils.VarList;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
+
 
 @Service
 public class CommentService {
@@ -21,23 +27,24 @@ public class CommentService {
     private CommentRepository commentRepository;
 
     @Autowired
+    private AuthUserRepository userRepository;
+
+    @Autowired
+    private NovelRepository novelRepository;
+
+    @Autowired
     private ModelMapper modelMapper;
 
     @Autowired
     private ResponseDTO responseDTO;
 
     @Transactional
-    public ResponseDTO saveComment(CommentDTO commentDTO) {
+    public ResponseDTO saveComment(CommentDTO commentDTO, UserDetails userDetails) {
         HashMap<String, String> errors = new HashMap<>();
 
        
         if (commentDTO.getContent() == null || commentDTO.getContent().trim().isEmpty()) {
             errors.put("content", "Comment content cannot be empty.");
-        }
-
-      
-        if (commentDTO.getUserId() == null || commentDTO.getUserId().trim().isEmpty()) {
-            errors.put("author", "Author details are missing or invalid.");
         }
 
         if (!errors.isEmpty()) {
@@ -49,12 +56,22 @@ public class CommentService {
         }
 
         try {
+
+            AuthUser user = userRepository.findByEmail(userDetails.getUsername()).get();
+            Novel novel = novelRepository.findById(commentDTO.getNovel()).get();
+
             Comment comment = modelMapper.map(commentDTO, Comment.class);
+            comment.setUser(user);
+            comment.setNovel(novel);
             commentRepository.save(comment);
 
             responseDTO.setCode(VarList.RSP_SUCCESS);
             responseDTO.setMessage("Comment saved successfully.");
-            responseDTO.setContent(commentDTO);
+            responseDTO.setContent(comment);
+        }   catch (NoSuchElementException e) {
+            responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
+            responseDTO.setMessage("User or Novel not found.");
+            responseDTO.setContent(null);
         } catch (Exception e) {
             responseDTO.setCode(VarList.RSP_FAIL);
             responseDTO.setMessage("Error saving the comment: " + e.getMessage());
@@ -64,29 +81,27 @@ public class CommentService {
         return responseDTO;
     }
 
-    public ResponseDTO getAllComments() {
+    @Transactional
+    public ResponseDTO getComment() {
+        
         try {
-            List<Comment> commentList = commentRepository.findAll();
-            List<CommentDTO> commentDTOList = modelMapper.map(commentList, new TypeToken<List<CommentDTO>>() {}.getType());
+            List<Comment> comments = commentRepository.findAll();
 
-            if (commentDTOList.isEmpty()) {
-                responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
-                responseDTO.setMessage("No comments found.");
-                responseDTO.setContent(null);
-            } else {
-                responseDTO.setCode(VarList.RSP_SUCCESS);
-                responseDTO.setMessage("Comments retrieved successfully.");
-                responseDTO.setContent(commentDTOList);
-            }
-        } catch (Exception e) {
-            responseDTO.setCode(VarList.RSP_FAIL);
-            responseDTO.setMessage("Error retrieving comments: " + e.getMessage());
-            responseDTO.setContent(null);
-        }
+            responseDTO.setCode(VarList.RSP_SUCCESS);
+            responseDTO.setMessage("Comments retrieved successfully.");
+            responseDTO.setContent(comments);
+     }  catch (Exception e) {
+            responseDTO.setCode(VarList.RSP_ERROR);
+            responseDTO.setMessage("Error fetching comment");
+            responseDTO.setContent(e.getMessage());
+     }
 
         return responseDTO;
-    }
 
+    }
+        
+
+    @Transactional
     public ResponseDTO getCommentById(String id) { 
         try {
             Optional<Comment> comment = commentRepository.findById(id);
