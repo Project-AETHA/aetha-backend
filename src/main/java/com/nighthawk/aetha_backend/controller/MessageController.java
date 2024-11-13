@@ -13,7 +13,6 @@ import java.util.List;
 @RequestMapping("/api/messages")
 @CrossOrigin
 public class MessageController {
-
     @Autowired
     private MessageService messageService;
 

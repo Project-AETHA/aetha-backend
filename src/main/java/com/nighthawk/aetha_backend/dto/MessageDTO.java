@@ -20,6 +20,7 @@ public class MessageDTO {
         this.dateTime = dateTime;
     }
 
+
     // Getters and Setters
     // ...
 }
