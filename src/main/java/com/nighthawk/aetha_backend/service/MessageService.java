@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class MessageService {
+    
     @Autowired
     private MessageRepository messageRepository;
 

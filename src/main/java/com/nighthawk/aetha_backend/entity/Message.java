@@ -20,7 +20,6 @@ public class Message {
 
     public Message() {}
 
-
     public Message(String sender, String receiver, String title, String content, Date dateTime, MessageStatus status) {
         this.sender = sender;
         this.receiver = receiver;
