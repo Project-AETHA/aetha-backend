@@ -24,13 +24,75 @@ public class NotificationSettings {
 
     private boolean reviewsOnsite;
 
-    // Getters and setters
+    public String getUserId() {
+        return userId;
+    }
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
 
-    public String getUserId() { return userId; }
-    public void setUserId(String userId) { this.userId = userId; }
+    public boolean isCommentRepliesOnsite() {
+        return commentRepliesOnsite;
+    }
+    public void setCommentRepliesOnsite(boolean commentRepliesOnsite) {
+        this.commentRepliesOnsite = commentRepliesOnsite;
+    }
 
-    public boolean isCommentRepliesOnsite() { return commentRepliesOnsite; }
-    public void setCommentRepliesOnsite(boolean commentRepliesOnsite) { this.commentRepliesOnsite = commentRepliesOnsite; }
+    public boolean isCommentRepliesEmail() {
+        return commentRepliesEmail;
+    }
+    public void setCommentRepliesEmail(boolean commentRepliesEmail) {
+        this.commentRepliesEmail = commentRepliesEmail;
+    }
 
-    // Other getters and setters for each field
+    public boolean isMentioningOnsite() {
+        return mentioningOnsite;
+    }
+    public void setMentioningOnsite(boolean mentioningOnsite) {
+        this.mentioningOnsite = mentioningOnsite;
+    }
+
+    public boolean isMentioningEmail() {
+        return mentioningEmail;
+    }
+    public void setMentioningEmail(boolean mentioningEmail) {
+        this.mentioningEmail = mentioningEmail;
+    }
+
+    public boolean isPrivateMessagesEmail() {
+        return privateMessagesEmail;
+    }
+    public void setPrivateMessagesEmail(boolean privateMessagesEmail) {
+        this.privateMessagesEmail = privateMessagesEmail;
+    }
+
+    public boolean isNewChaptersEmail() {
+        return newChaptersEmail;
+    }
+    public void setNewChaptersEmail(boolean newChaptersEmail) {
+        this.newChaptersEmail = newChaptersEmail;
+    }
+
+    public boolean isWeeklyChapterSummaryEmail() {
+        return weeklyChapterSummaryEmail;
+    }
+    public void setWeeklyChapterSummaryEmail(boolean weeklyChapterSummaryEmail) {
+        this.weeklyChapterSummaryEmail = weeklyChapterSummaryEmail;
+    }
+
+    public boolean isNewCommentInChapterOnsite() {
+        return newCommentInChapterOnsite;
+    }
+    public void setNewCommentInChapterOnsite(boolean newCommentInChapterOnsite) {
+        this.newCommentInChapterOnsite = newCommentInChapterOnsite;
+    }
+
+    public boolean isReviewsOnsite() {
+        return reviewsOnsite;
+    }
+    public void setReviewsOnsite(boolean reviewsOnsite) {
+        this.reviewsOnsite = reviewsOnsite;
+    }
+
+
 }
