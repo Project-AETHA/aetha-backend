@@ -27,7 +27,7 @@ public class NovelReportedContent {
     //    @DocumentReference(collection = "users")
     @Indexed
     @DBRef(lazy = true)
-    private AuthUser user;
+    private AuthUser reporteduser;
 
     private ContentType type;
 

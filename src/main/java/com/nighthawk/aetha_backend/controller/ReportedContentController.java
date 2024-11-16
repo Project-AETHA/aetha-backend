@@ -1,10 +1,15 @@
 package com.nighthawk.aetha_backend.controller;
 
 
+import com.nighthawk.aetha_backend.dto.PoemDTO;
 import com.nighthawk.aetha_backend.dto.ResponseDTO;
+import com.nighthawk.aetha_backend.entity.NovelReportedContent;
+import com.nighthawk.aetha_backend.entity.PoemReportedContent;
 import com.nighthawk.aetha_backend.service.ReportedContentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin
@@ -47,6 +52,22 @@ public class ReportedContentController {
     @PatchMapping("/decline-reportedcontent/{reportID}")
     public ResponseEntity<ResponseDTO> declineReportedContent(@PathVariable String reportId){
         return ResponseEntity.ok(reportedContentService.declineReport(reportId));
+    }
+
+    @PostMapping("/report-poem")
+    public ResponseEntity<ResponseDTO> reportPoem (
+            @RequestBody PoemReportedContent poemReportedContent,
+            @AuthenticationPrincipal UserDetails userDetails
+    ){
+        return ResponseEntity.ok(reportedContentService.reportPoem(poemReportedContent,userDetails));
+    }
+
+    @PostMapping("/report-novel")
+    public ResponseEntity<ResponseDTO> reportNovel (
+            @RequestBody NovelReportedContent novelReportedContent,
+            @AuthenticationPrincipal UserDetails userDetails
+    ){
+        return ResponseEntity.ok(reportedContentService.reportNovel(novelReportedContent,userDetails));
     }
 
 

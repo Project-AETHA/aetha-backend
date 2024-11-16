@@ -1,19 +1,15 @@
 package com.nighthawk.aetha_backend.service;
 
 import com.nighthawk.aetha_backend.dto.*;
-import com.nighthawk.aetha_backend.entity.Novel;
-import com.nighthawk.aetha_backend.entity.NovelReportedContent;
-import com.nighthawk.aetha_backend.entity.Poem;
-import com.nighthawk.aetha_backend.entity.PoemReportedContent;
-import com.nighthawk.aetha_backend.repository.NovelReportedContentRepository;
-import com.nighthawk.aetha_backend.repository.NovelRepository;
-import com.nighthawk.aetha_backend.repository.PoemReportedContentRepository;
-import com.nighthawk.aetha_backend.repository.PoemRepository;
+import com.nighthawk.aetha_backend.entity.*;
+import com.nighthawk.aetha_backend.repository.*;
 import com.nighthawk.aetha_backend.utils.StatusList;
 import com.nighthawk.aetha_backend.utils.VarList;
+import com.nighthawk.aetha_backend.utils.predefined.ContentType;
 import org.apache.kafka.common.errors.ResourceNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -35,6 +31,9 @@ public class ReportedContentService {
 
     @Autowired
     public NovelReportedContentRepository novelReportedContentRepository;
+
+    @Autowired
+    public AuthUserRepository authUserRepository;
 
     @Autowired
     ModelMapper modelMapper;
@@ -199,9 +198,64 @@ public class ReportedContentService {
        }
     }
 
+    public ResponseDTO reportPoem(PoemReportedContent poemReportedContent, UserDetails userDetails){
+
+        try{
+            AuthUser reporteduser = authUserRepository.findByEmail(userDetails.getUsername()).orElse(null);
+
+            if(reporteduser != null) {
+
+                poemReportedContent.setReportedUser(reporteduser);
+                poemReportedContent.setType(ContentType.POEM);
+
+                PoemReportedContent savedReport = poemReportedContentRepository.save(poemReportedContent);
+
+                responseDTO.setCode(VarList.RSP_SUCCESS);
+                responseDTO.setMessage("Successfull");
+                responseDTO.setContent(savedReport);
+
+            } else {
+
+                responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
+                responseDTO.setMessage("User not found");
+            }
+
+        } catch (Exception e){
+            responseDTO.setCode(VarList.RSP_ERROR);
+            responseDTO.setMessage("error occured");
+            responseDTO.setContent(e.getMessage());
+        }
+        return responseDTO;
+    }
 
 
+    public ResponseDTO reportNovel(NovelReportedContent novelReportedContent, UserDetails userDetails) {
 
+        try{
+            AuthUser reporteduser = authUserRepository.findByEmail(userDetails.getUsername()).orElse(null);
 
+            if(reporteduser != null) {
 
+                novelReportedContent.setReporteduser(reporteduser);
+                novelReportedContent.setType(ContentType.NOVEL);
+
+                NovelReportedContent savedReport = novelReportedContentRepository.save(novelReportedContent);
+
+                responseDTO.setCode(VarList.RSP_SUCCESS);
+                responseDTO.setMessage("Successfull");
+                responseDTO.setContent(savedReport);
+
+            } else {
+
+                responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
+                responseDTO.setMessage("User not found");
+            }
+        } catch (Exception e){
+            responseDTO.setCode(VarList.RSP_ERROR);
+            responseDTO.setMessage("error occured");
+            responseDTO.setContent(e.getMessage());
+
+        }
+        return responseDTO;
+    }
 }
