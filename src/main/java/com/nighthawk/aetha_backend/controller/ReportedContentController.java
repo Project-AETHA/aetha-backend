@@ -2,7 +2,7 @@ package com.nighthawk.aetha_backend.controller;
 
 
 import com.nighthawk.aetha_backend.dto.ResponseDTO;
-import com.nighthawk.aetha_backend.service.ReportedContentService;
+import com.nighthawk.aetha_backend.service.PoemReportedContentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,18 +13,14 @@ import org.springframework.web.bind.annotation.*;
 public class ReportedContentController {
 
     @Autowired
-    public ReportedContentService reportedContentService;
+    public PoemReportedContentService poemReportedContentService;
 
     @Autowired
     public ResponseDTO responseDTO;
 
-    @GetMapping("/get-all-reported-content")
-    public ResponseEntity<ResponseDTO> getAllReportedContent(){
-        return ResponseEntity.ok(reportedContentService.getAllReportedContent());
-    }
 
-    @GetMapping("/get-all-reported-content/{id}")
-    public ResponseEntity<ResponseDTO> findContentById(@PathVariable String id){
-        return ResponseEntity.ok(reportedContentService.getReportedContentById(id));
+    @GetMapping("/get-all-grouped-reported-poems")
+    public ResponseEntity<ResponseDTO> getAllGroupedReportedContent(){
+        return ResponseEntity.ok(poemReportedContentService.getAllGroupedReportedPoems());
     }
 }

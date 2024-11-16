@@ -10,21 +10,16 @@ import org.springframework.data.mongodb.core.mapping.DocumentReference;
 
 import java.util.Date;
 
+
 @Data
-@Document("reported_content")
-public class ReportedContent {
+@Document("reported_novel")
+public class PoemReportedContent {
 
     @Id
     private String id;
 
-    @DocumentReference(collection = "novels")
-    private Novel novel;
-
     @DocumentReference(collection = "poems")
     private Poem poem;
-
-    @DocumentReference(collection = "chapters")
-    private String chapterId;
 
     //    @DocumentReference(collection = "users")
     @Indexed
@@ -36,5 +31,4 @@ public class ReportedContent {
     private Date createdAt = new Date();
 
     private String reason;
-
 }
