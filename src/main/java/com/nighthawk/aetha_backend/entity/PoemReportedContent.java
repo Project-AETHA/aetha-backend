@@ -1,5 +1,6 @@
 package com.nighthawk.aetha_backend.entity;
 
+import com.nighthawk.aetha_backend.utils.StatusList;
 import com.nighthawk.aetha_backend.utils.predefined.ContentType;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
@@ -24,11 +25,13 @@ public class PoemReportedContent {
     //    @DocumentReference(collection = "users")
     @Indexed
     @DBRef(lazy = true)
-    private AuthUser user;
+    private AuthUser reportedUser;
 
     private ContentType type;
 
     private Date createdAt = new Date();
 
     private String reason;
+
+    private StatusList status = StatusList.ACTIVE;
 }

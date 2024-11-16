@@ -1,9 +1,7 @@
 package com.nighthawk.aetha_backend.dto;
 
-import com.nighthawk.aetha_backend.entity.AuthUser;
-import com.nighthawk.aetha_backend.entity.Novel;
+
 import com.nighthawk.aetha_backend.entity.Poem;
-import com.nighthawk.aetha_backend.utils.predefined.ContentType;
 import lombok.Data;
 
 import java.util.Date;

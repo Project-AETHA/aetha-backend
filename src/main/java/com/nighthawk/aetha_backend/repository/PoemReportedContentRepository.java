@@ -1,6 +1,7 @@
 package com.nighthawk.aetha_backend.repository;
 
 import com.nighthawk.aetha_backend.dto.PoemReportedContentSummaryDTO;
+import com.nighthawk.aetha_backend.entity.Poem;
 import com.nighthawk.aetha_backend.entity.PoemReportedContent;
 import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -22,5 +23,7 @@ public interface PoemReportedContentRepository extends MongoRepository<PoemRepor
             "{ '$sort': { 'count': -1 } }"  // Sort by number of reports in descending order
     })
     List<PoemReportedContentSummaryDTO> groupReportsByPoem();
+
+    List<PoemReportedContent> findByPoem(Poem poem);
 }
 
