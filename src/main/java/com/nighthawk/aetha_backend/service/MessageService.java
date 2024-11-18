@@ -4,6 +4,7 @@ import com.nighthawk.aetha_backend.dto.MessageDTO;
 import com.nighthawk.aetha_backend.entity.Message;
 import com.nighthawk.aetha_backend.entity.MessageStatus;
 import com.nighthawk.aetha_backend.repository.MessageRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -14,6 +15,9 @@ public class MessageService {
     
     @Autowired
     private MessageRepository messageRepository;
+
+    @Autowired
+    private ModelMapper modelMapper;
 
     public List<MessageDTO> getInboxMessages(String receiver) {
         List<Message> messages = messageRepository.findByReceiverAndStatus(receiver, MessageStatus.INBOX);
@@ -38,11 +42,6 @@ public class MessageService {
     }
 
     private MessageDTO convertToDTO(Message message) {
-        return new MessageDTO(
-                message.getTitle(),
-                message.getSender(),
-                message.getReceiver(),
-                message.getDateTime()
-        );
+        return modelMapper.map(message, MessageDTO.class);
     }
 }
