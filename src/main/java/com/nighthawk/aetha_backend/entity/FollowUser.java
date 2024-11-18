@@ -1,25 +1,25 @@
 package com.nighthawk.aetha_backend.entity;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DocumentReference;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
 
 @Data
 @Document("follow")
-public class Follow {
+public class FollowUser {
     @Id
     private String id;
 
-    @DBRef(lazy = true)
+    @DocumentReference(collection = "users")
     private AuthUser follower;
 
-    @DBRef(lazy = true)
+    @DocumentReference(collection = "users")
     private AuthUser following;
 
-    final private LocalDate followedAt = new Date().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+    private LocalDate followedAt;
 }
