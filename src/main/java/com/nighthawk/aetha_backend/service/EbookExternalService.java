@@ -4,6 +4,7 @@ import com.nighthawk.aetha_backend.dto.EbookExternalDTO;
 import com.nighthawk.aetha_backend.dto.RequestDTO;
 import com.nighthawk.aetha_backend.dto.ResponseDTO;
 import com.nighthawk.aetha_backend.entity.AuthUser;
+import com.nighthawk.aetha_backend.entity.Novel;
 import com.nighthawk.aetha_backend.entity.ebook.EbookExternal;
 import com.nighthawk.aetha_backend.entity.Genres;
 import com.nighthawk.aetha_backend.entity.Tags;
@@ -14,9 +15,15 @@ import com.nighthawk.aetha_backend.utils.EncryptionUtil;
 import com.nighthawk.aetha_backend.utils.FileUploadUtil;
 import com.nighthawk.aetha_backend.utils.VarList;
 import com.nighthawk.aetha_backend.utils.predefined.ContentStatus;
+import org.apache.coyote.Response;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,6 +60,8 @@ public class EbookExternalService {
 
     @Autowired
     private Environment env;
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
     private boolean isValidISBN(String isbn) {
         Pattern pattern = Pattern.compile(ISBN_PATTERN);
@@ -291,14 +300,48 @@ public class EbookExternalService {
         return responseDTO;
     }
 
-    public List<EbookExternalDTO> filterEbooks(RequestDTO requestDTO) {
+    @Transactional
+    public ResponseDTO searchEbooks(RequestDTO requestDTO, int page, int pageSize) {
 
-        // Execute the query
-        return searchRepository.searchEbooks(
-                requestDTO.getSearchTerm(),
-                requestDTO.getGenres(),
-                requestDTO.getRating()
-        );
+        try {
+            // Create pagination object
+//            Pageable pageable = PageRequest.of(page, pageSize);
+
+            // Create query object
+            Query query = new Query();
+
+            // Add search criteria
+            if (requestDTO.getSearchTerm() != null && !requestDTO.getSearchTerm().isEmpty()) {
+                query.addCriteria(Criteria.where("title").regex(".*" + Pattern.quote(requestDTO.getSearchTerm().toLowerCase()) + ".*", "i"));
+            }
+            if (requestDTO.getRating() != null) {
+                query.addCriteria(Criteria.where("rating").gte(requestDTO.getRating()));
+            }
+
+            // Add pagination to query
+//            query.with(pageable);
+
+            // Execute query
+            List<EbookExternal> ebooks = mongoTemplate.find(query, EbookExternal.class);
+
+            // Check if results are empty
+            if (ebooks.isEmpty()) {
+                responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
+                responseDTO.setMessage("No ebooks found for the provided criteria");
+                responseDTO.setContent(null);
+            } else {
+                // Prepare response for successful fetch
+                responseDTO.setCode(VarList.RSP_SUCCESS);
+                responseDTO.setMessage("Ebooks fetched successfully");
+                responseDTO.setContent(ebooks);
+            }
+        } catch (Exception e) {
+            responseDTO.setCode(VarList.RSP_ERROR);
+            responseDTO.setMessage("Error occurred");
+            responseDTO.setContent(e.getMessage());
+        }
+
+        return responseDTO;
     }
 
     @Transactional

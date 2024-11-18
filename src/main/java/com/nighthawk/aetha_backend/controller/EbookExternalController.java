@@ -35,6 +35,8 @@ public class EbookExternalController {
     //! Temp - Mail service instance
     @Autowired
     MailService mailService;
+    @Autowired
+    private EbookExternalService ebookExternalService;
 
     @PostMapping("/publish")
     public ResponseEntity<ResponseDTO> publishEbook(
@@ -99,15 +101,6 @@ public class EbookExternalController {
         return ResponseEntity.ok(service.findMyBooks(userDetails));
     }
 
-    @PostMapping("/search")
-    public ResponseEntity<ResponseDTO> getAllBooksSorted(@RequestBody RequestDTO requestDTO) {
-        responseDTO.setCode(VarList.RSP_SUCCESS);
-        responseDTO.setMessage("Search results");
-        responseDTO.setContent(service.filterEbooks(requestDTO));
-
-        return new ResponseEntity<>(responseDTO, HttpStatus.OK);
-    }
-
     // ? Deleting the book
     // ? Can only be deleted by the author or an admin
     @DeleteMapping("/{id}")
@@ -168,6 +161,16 @@ public class EbookExternalController {
         }
 
         return new ResponseEntity<>(responseDTO, HttpStatus.OK);
+    }
+
+    // ? Search by title
+    @PostMapping("/search")
+    public ResponseEntity<ResponseDTO> searchEbooks(
+            @RequestBody RequestDTO requestDTO,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int pageSize
+    ) {
+        return ResponseEntity.ok(ebookExternalService.searchEbooks(requestDTO, page, pageSize));
     }
 
 }
