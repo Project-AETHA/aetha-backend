@@ -9,6 +9,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/profile-reviews")
+
 public class ProfileReviewController {
     private final ProfileReviewService profileReviewService;
 

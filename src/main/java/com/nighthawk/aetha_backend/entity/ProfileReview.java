@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Document(collection = "profile_reviews") // Specifies the MongoDB collection name
+
 public class ProfileReview {
     @Id
     private String id; // Use String for MongoDB IDs (ObjectId in MongoDB)
