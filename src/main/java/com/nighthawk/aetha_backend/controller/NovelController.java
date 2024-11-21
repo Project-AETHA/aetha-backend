@@ -85,6 +85,13 @@ public class NovelController {
         return ResponseEntity.ok(novelService.getNovelsByAuthor(authorId, page, pageSize));
     }
 
+
+    //? Get novel details including the chapters, reviews and user-info
+    @GetMapping("/chapters-overview/{novelId}")
+    public ResponseEntity<ResponseDTO> getNovelChaptersOverview(@PathVariable String novelId) {
+        return ResponseEntity.ok(novelService.getNovelChaptersOverview(novelId));
+    }
+
     //!!! Search results for novels
     // TODO - Implement the search functionality
     @PostMapping("/search")

@@ -27,8 +27,12 @@ public class RequestDTO {
     private Date updatedAt;
     private String searchTerm;
     private Double rating;
-    private Date publishedWithin;
+    private String publishedWithin;
 
     // ? Specific to Content
     private Date manualReleaseDate;
+
+    //? Comment
+    private String novel;
+    private String user;
 }

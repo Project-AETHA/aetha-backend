@@ -1,20 +1,20 @@
 package com.nighthawk.aetha_backend.service;
 
-import com.nighthawk.aetha_backend.dto.NotificationDTO;
-import com.nighthawk.aetha_backend.dto.NovelDTO;
-import com.nighthawk.aetha_backend.dto.RequestDTO;
-import com.nighthawk.aetha_backend.dto.ResponseDTO;
+import com.nighthawk.aetha_backend.dto.*;
 import com.nighthawk.aetha_backend.entity.AuthUser;
 import com.nighthawk.aetha_backend.entity.Genres;
 import com.nighthawk.aetha_backend.entity.Novel;
 import com.nighthawk.aetha_backend.entity.Tags;
 import com.nighthawk.aetha_backend.repository.AuthUserRepository;
+import com.nighthawk.aetha_backend.repository.ChapterRepository;
 import com.nighthawk.aetha_backend.repository.NovelRepository;
 import com.nighthawk.aetha_backend.utils.VarList;
 import com.nighthawk.aetha_backend.utils.predefined.ContentStatus;
 import com.nighthawk.aetha_backend.utils.predefined.ContentWarnings;
 import com.nighthawk.aetha_backend.utils.predefined.NotificationCategory;
 import com.nighthawk.aetha_backend.utils.predefined.NotifyType;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -42,6 +42,10 @@ public class NovelService {
     private MongoTemplate mongoTemplate;
     @Autowired
     private NotificationService notificationService;
+    @Autowired
+    private ChapterRepository chapterRepository;
+    @Autowired
+    private ModelMapper modelMapper;
 
     public ResponseDTO createNovel(NovelDTO novelDTO, UserDetails userDetails) {
 
@@ -314,6 +318,42 @@ public class NovelService {
         } catch (Exception e) {
             responseDTO.setCode(VarList.RSP_ERROR);
             responseDTO.setMessage("Error fetching novels");
+            responseDTO.setContent(e.getMessage());
+        }
+
+        return responseDTO;
+    }
+
+    public ResponseDTO getNovelChaptersOverview(String novelId) {
+
+        try {
+            Novel novel = novelRepository.findById(novelId).orElseThrow(() -> new RuntimeException("Novel not found"));
+
+            // TODO - Implement the logic to get the chapters and reviews
+            List<ChapterDTO> chapters = modelMapper.map(
+                    chapterRepository.findAllByNovelAndStatusAndIsVisible(novel, "COMPLETED", true),
+                    new TypeToken<List<ChapterDTO>>(){}.getType() //* To a list of ChapterDTO
+            );
+
+            responseDTO.setCode(VarList.RSP_SUCCESS);
+            responseDTO.setMessage("Data found");
+
+            //? A DTO that contains the novel, chapters and reviews
+            NovelChapterOverview novelChapterOverview = new NovelChapterOverview();
+            novelChapterOverview.setNovel(novel);
+            novelChapterOverview.setChapters(chapters);
+            novelChapterOverview.setReviews(null);
+            // TODO - Add the reviews later
+
+            responseDTO.setContent(novelChapterOverview);
+
+        } catch (RuntimeException e) {
+            responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
+            responseDTO.setMessage("Error - Novel not found");
+            responseDTO.setContent(e.getMessage());
+        } catch (Exception e) {
+            responseDTO.setCode(VarList.RSP_ERROR);
+            responseDTO.setMessage("Error occurred");
             responseDTO.setContent(e.getMessage());
         }
 
