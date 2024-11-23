@@ -13,7 +13,7 @@ import java.util.Date;
 
 
 @Data
-@Document("reported_novel")
+@Document("reported_poem")
 public class PoemReportedContent {
 
     @Id
