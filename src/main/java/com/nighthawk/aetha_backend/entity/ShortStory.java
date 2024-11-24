@@ -38,7 +38,7 @@ public class ShortStory {
     private String coverImage;
 
     private List<Genres> genres;
-    private List<Tags> tags;
+    private List<Tags2> tags;
     private List<String> customTags;
 
     // ? Not sure of the content

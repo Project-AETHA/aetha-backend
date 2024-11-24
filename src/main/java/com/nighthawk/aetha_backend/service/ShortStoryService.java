@@ -1,10 +1,7 @@
 package com.nighthawk.aetha_backend.service;
 
 import com.nighthawk.aetha_backend.dto.*;
-import com.nighthawk.aetha_backend.entity.AuthUser;
-import com.nighthawk.aetha_backend.entity.Genres;
-import com.nighthawk.aetha_backend.entity.ShortStory;
-import com.nighthawk.aetha_backend.entity.Tags;
+import com.nighthawk.aetha_backend.entity.*;
 import com.nighthawk.aetha_backend.repository.ShortStoryRepository;
 import com.nighthawk.aetha_backend.repository.AuthUserRepository;
 import com.nighthawk.aetha_backend.utils.VarList;
@@ -23,6 +20,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,29 +41,21 @@ public class ShortStoryService {
     @Autowired
     private ModelMapper modelMapper;
 
-    public ResponseDTO createShortStory(ShortStoryDTO ShortStoryDTO, UserDetails userDetails) {
-
+    public ResponseDTO createShortStory(ShortStoryDTO shortStoryDTO, UserDetails userDetails) {
+        ResponseDTO responseDTO = new ResponseDTO();
         HashMap<String, String> errors = new HashMap<>();
-        ShortStory ShortStory = new ShortStory();
+        ShortStory shortStory = new ShortStory();
 
         try {
-            //? Validation logic
-            if(ShortStoryDTO.getTitle() == null || ShortStoryDTO.getTitle().isEmpty()) errors.put("title", "Title cannot be empty");
-            else ShortStory.setTitle(ShortStoryDTO.getTitle());
+            // Basic field validation
+            validateBasicFields(shortStoryDTO, errors, shortStory);
 
-            if(ShortStoryDTO.getSynopsis() == null || ShortStoryDTO.getSynopsis().isEmpty()) errors.put("synopsis", "Synopsis cannot be empty");
-            else ShortStory.setSynopsis(ShortStoryDTO.getSynopsis());
-
-            if(ShortStoryDTO.getDescription() == null || ShortStoryDTO.getDescription().isEmpty()) errors.put("description", "Description cannot be empty");
-            else ShortStory.setDescription(ShortStoryDTO.getDescription());
-
-            if(ShortStoryDTO.getCoverImage() == null || ShortStoryDTO.getCoverImage().isEmpty()) errors.put("coverImage", "Cover image cannot be empty");
-            else ShortStory.setCoverImage(ShortStoryDTO.getCoverImage());
-
-            if(ShortStoryDTO.getGenres() == null) errors.put("genre", "Genre cannot be empty");
-            else {
+            // Genre validation and conversion
+            if (shortStoryDTO.getGenres() == null || shortStoryDTO.getGenres().isEmpty()) {
+                errors.put("genres", "At least one genre must be selected");
+            } else {
                 List<Genres> genreList = new ArrayList<>();
-                for (String genreString : ShortStoryDTO.getGenres()) {
+                for (String genreString : shortStoryDTO.getGenres()) {
                     String trimmedGenre = genreString.trim().toUpperCase();
                     try {
                         Genres genre = Genres.valueOf(trimmedGenre);
@@ -74,27 +64,35 @@ public class ShortStoryService {
                         errors.put("genres", "Invalid genre: " + trimmedGenre);
                     }
                 }
-                ShortStory.setGenres(genreList);
+                shortStory.setGenres(genreList);
             }
 
-            if(ShortStoryDTO.getTags() != null) {
-                List<Tags> tagsList = new ArrayList<>();
-                for (String tagString : ShortStoryDTO.getTags()) {
+            // Tags validation and conversion
+            if (shortStoryDTO.getTags() != null && !shortStoryDTO.getTags().isEmpty()) {
+                List<Tags2> tagsList = new ArrayList<>();
+                for (String tagString : shortStoryDTO.getTags()) {
                     String trimmedTag = tagString.trim().toUpperCase();
                     try {
-                        Tags tag = Tags.valueOf(trimmedTag);
+                        Tags2 tag = Tags2.valueOf(trimmedTag);
                         tagsList.add(tag);
                     } catch (IllegalArgumentException e) {
                         errors.put("tags", "Invalid tag: " + trimmedTag);
                     }
                 }
-                ShortStory.setTags(tagsList);
+                shortStory.setTags(tagsList);
             }
 
-            if(ShortStoryDTO.getContentWarning() == null) errors.put("contentWarning", "Content warnings cannot be empty");
-            else {
+            // Custom tags handling
+            if (shortStoryDTO.getCustomTags() != null) {
+                shortStory.setCustomTags(shortStoryDTO.getCustomTags());
+            }
+
+            // Content warnings validation and conversion
+            if (shortStoryDTO.getContentWarning() == null || shortStoryDTO.getContentWarning().isEmpty()) {
+                errors.put("contentWarning", "Content warnings cannot be empty");
+            } else {
                 List<ContentWarnings> warningsList = new ArrayList<>();
-                for (String warningString : ShortStoryDTO.getContentWarning()) {
+                for (String warningString : shortStoryDTO.getContentWarning()) {
                     String trimmedWarning = warningString.trim().toUpperCase();
                     try {
                         ContentWarnings warning = ContentWarnings.valueOf(trimmedWarning);
@@ -103,31 +101,67 @@ public class ShortStoryService {
                         errors.put("contentWarning", "Invalid warning: " + trimmedWarning);
                     }
                 }
-                ShortStory.setContentWarning(warningsList);
+                shortStory.setContentWarning(warningsList);
             }
 
-            ShortStory.setAuthor(authUserRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new RuntimeException("Author not found")));
-            ShortStoryDTO.setStatus(ContentStatus.PENDING);
+            // Handle manual release date
+            if (shortStoryDTO.getManualReleaseDate() != null) {
+                shortStory.setManualReleaseDate(shortStoryDTO.getManualReleaseDate());
+            }
 
-            //? TODO - Manual release date
+            // Set default values
+            shortStory.setAuthor(authUserRepository.findByEmail(userDetails.getUsername())
+                    .orElseThrow(() -> new RuntimeException("Author not found")));
+            shortStory.setStatus(ContentStatus.PENDING);
+            shortStory.setCreatedAt(LocalDate.now());
+            shortStory.setRating(0.0f);
+            shortStory.setViews(0);
+            shortStory.setClicks(0);
 
-            if(errors.isEmpty()) {
+            if (errors.isEmpty()) {
+                ShortStory savedStory = ShortStoryRepository.save(shortStory);
                 responseDTO.setCode(VarList.RSP_SUCCESS);
-                responseDTO.setMessage("ShortStory created successfully");
-                responseDTO.setContent(ShortStoryRepository.save(ShortStory));
+                responseDTO.setMessage("Short story created successfully");
+                responseDTO.setContent(savedStory);
             } else {
                 responseDTO.setCode(VarList.RSP_VALIDATION_FAILED);
                 responseDTO.setMessage("Validation failed");
-                responseDTO.setContent(ShortStory);
+                responseDTO.setContent(shortStory);
                 responseDTO.setErrors(errors);
             }
         } catch (Exception e) {
             responseDTO.setCode(VarList.RSP_ERROR);
-            responseDTO.setMessage("Error Occurred");
+            responseDTO.setMessage("Error occurred while creating short story");
             responseDTO.setContent(e.getMessage());
         }
 
         return responseDTO;
+    }
+
+    private void validateBasicFields(ShortStoryDTO shortStoryDTO, HashMap<String, String> errors, ShortStory shortStory) {
+        if (shortStoryDTO.getTitle() == null || shortStoryDTO.getTitle().trim().isEmpty()) {
+            errors.put("title", "Title cannot be empty");
+        } else {
+            shortStory.setTitle(shortStoryDTO.getTitle().trim());
+        }
+
+        if (shortStoryDTO.getSynopsis() == null || shortStoryDTO.getSynopsis().trim().isEmpty()) {
+            errors.put("synopsis", "Synopsis cannot be empty");
+        } else {
+            shortStory.setSynopsis(shortStoryDTO.getSynopsis().trim());
+        }
+
+        if (shortStoryDTO.getDescription() == null || shortStoryDTO.getDescription().trim().isEmpty()) {
+            errors.put("description", "Description cannot be empty");
+        } else {
+            shortStory.setDescription(shortStoryDTO.getDescription().trim());
+        }
+
+        if (shortStoryDTO.getCoverImage() == null || shortStoryDTO.getCoverImage().trim().isEmpty()) {
+            errors.put("coverImage", "Cover image cannot be empty");
+        } else {
+            shortStory.setCoverImage(shortStoryDTO.getCoverImage().trim());
+        }
     }
 
     public ResponseDTO getAllShortStorys() {
