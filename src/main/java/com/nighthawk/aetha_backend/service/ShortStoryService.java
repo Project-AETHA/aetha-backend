@@ -1,20 +1,18 @@
 package com.nighthawk.aetha_backend.service;
 
-import com.nighthawk.aetha_backend.dto.NotificationDTO;
-import com.nighthawk.aetha_backend.dto.ShortStoryDTO;
-import com.nighthawk.aetha_backend.dto.RequestDTO;
-import com.nighthawk.aetha_backend.dto.ResponseDTO;
+import com.nighthawk.aetha_backend.dto.*;
 import com.nighthawk.aetha_backend.entity.AuthUser;
 import com.nighthawk.aetha_backend.entity.Genres;
 import com.nighthawk.aetha_backend.entity.ShortStory;
 import com.nighthawk.aetha_backend.entity.Tags;
-import com.nighthawk.aetha_backend.repository.AuthUserRepository;
 import com.nighthawk.aetha_backend.repository.ShortStoryRepository;
+import com.nighthawk.aetha_backend.repository.AuthUserRepository;
 import com.nighthawk.aetha_backend.utils.VarList;
 import com.nighthawk.aetha_backend.utils.predefined.ContentStatus;
 import com.nighthawk.aetha_backend.utils.predefined.ContentWarnings;
 import com.nighthawk.aetha_backend.utils.predefined.NotificationCategory;
 import com.nighthawk.aetha_backend.utils.predefined.NotifyType;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -42,6 +40,8 @@ public class ShortStoryService {
     private MongoTemplate mongoTemplate;
     @Autowired
     private NotificationService notificationService;
+    @Autowired
+    private ModelMapper modelMapper;
 
     public ResponseDTO createShortStory(ShortStoryDTO ShortStoryDTO, UserDetails userDetails) {
 
@@ -319,4 +319,5 @@ public class ShortStoryService {
 
         return responseDTO;
     }
+
 }
