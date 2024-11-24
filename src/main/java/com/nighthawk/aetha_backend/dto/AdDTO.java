@@ -10,16 +10,12 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AdDTO {
-    private String id;
-    private String title;
-    private String content;
-    private Date createdAt;
-    private Date expiresAt;
-    private Boolean isActive;
-    private String imageUrl;
-    private Double budget;
-    private String pricePlan;
-    private String campaignType;
+    private String internalTitle;
+    private String adType;
+    private String backgroundImage;
+    private String redirectLink;
+    private Date startDate;
+    private String selectedPlan;
 
     // Creator information
     private String creatorId;
