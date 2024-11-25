@@ -9,5 +9,6 @@ public enum Tags2 {
     MUST_READ,
     RECOMMENDED,
     YOUNG_ADULT,
-    CHILDREN
+    CHILDREN,
+    BESTSELLER
 }

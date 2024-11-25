@@ -145,17 +145,6 @@ public class ShortStoryService {
             shortStory.setTitle(shortStoryDTO.getTitle().trim());
         }
 
-        if (shortStoryDTO.getSynopsis() == null || shortStoryDTO.getSynopsis().trim().isEmpty()) {
-            errors.put("synopsis", "Synopsis cannot be empty");
-        } else {
-            shortStory.setSynopsis(shortStoryDTO.getSynopsis().trim());
-        }
-
-        if (shortStoryDTO.getDescription() == null || shortStoryDTO.getDescription().trim().isEmpty()) {
-            errors.put("description", "Description cannot be empty");
-        } else {
-            shortStory.setDescription(shortStoryDTO.getDescription().trim());
-        }
 
         if (shortStoryDTO.getCoverImage() == null || shortStoryDTO.getCoverImage().trim().isEmpty()) {
             errors.put("coverImage", "Cover image cannot be empty");
@@ -174,6 +163,8 @@ public class ShortStoryService {
             responseDTO.setCode(VarList.RSP_ERROR);
             responseDTO.setMessage("Error fetching ShortStorys");
             responseDTO.setContent(null);
+            System.err.println("Error fetching ShortStorys: " + e.getMessage());
+            e.printStackTrace();
         }
 
         return responseDTO;

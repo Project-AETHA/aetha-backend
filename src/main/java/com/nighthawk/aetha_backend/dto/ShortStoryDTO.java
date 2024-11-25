@@ -19,8 +19,6 @@ public class ShortStoryDTO {
     private String id;
     private AuthUser author;
     private String title;
-    private String synopsis;
-    private String description;
     private String coverImage;
     private List<String> genres;
     private List<String> tags;
