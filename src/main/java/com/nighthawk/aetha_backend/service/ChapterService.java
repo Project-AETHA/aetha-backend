@@ -5,23 +5,25 @@ import com.nighthawk.aetha_backend.dto.ResponseDTO;
 import com.nighthawk.aetha_backend.entity.AuthUser;
 import com.nighthawk.aetha_backend.entity.Chapter;
 import com.nighthawk.aetha_backend.entity.Novel;
-import com.nighthawk.aetha_backend.repository.AuthUserRepository;
-import com.nighthawk.aetha_backend.repository.ChapterRepository;
-import com.nighthawk.aetha_backend.repository.ClicksRepository;
-import com.nighthawk.aetha_backend.repository.NovelRepository;
+import com.nighthawk.aetha_backend.entity.SubscriptionTiers;
+import com.nighthawk.aetha_backend.repository.*;
 import com.nighthawk.aetha_backend.utils.VarList;
 import com.nighthawk.aetha_backend.utils.predefined.ContentStatus;
+import org.bson.types.ObjectId;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
+@Transactional
 public class ChapterService {
 
 
@@ -31,6 +33,7 @@ public class ChapterService {
     private final NovelRepository novelRepository;
     private final AuthUserRepository authUserRepository;
     private final ModelMapper modelMapper;
+    private final SubscriptionTiersRepository subscriptionTiersRepository;
 
     @Autowired
     public ChapterService (
@@ -39,13 +42,14 @@ public class ChapterService {
             NovelRepository novelRepository,
             AuthUserRepository authUserRepository,
             ModelMapper modelMapper,
-            ClicksRepository clicksRepository) {
+            ClicksRepository clicksRepository, SubscriptionTiersRepository subscriptionTiersRepository) {
         this.responseDTO = responseDTO;
         this.chapterRepository = chapterRepository;
         this.novelRepository = novelRepository;
         this.authUserRepository = authUserRepository;
         this.modelMapper = modelMapper;
         this.clicksRepository = clicksRepository;
+        this.subscriptionTiersRepository = subscriptionTiersRepository;
     }
 
     //* Getting all the chapters by the novelId given
@@ -278,7 +282,17 @@ public class ChapterService {
 
             List<Chapter> chapters = chapterRepository.findByNovel(novel);
             int totalClicks = clicksRepository.countClicksByNovel(novel);
+            SubscriptionTiers tiers = subscriptionTiersRepository.findByNovelId(novel.getId()).orElseThrow(() -> new NoSuchElementException("Subscription tiers not found"));
+            tiers.setNovel(novel);
 
+            HashMap<String, Object> data = new HashMap<>();
+            data.put("chapters", chapters);
+            data.put("clicks", totalClicks);
+            data.put("tiers", tiers);
+
+            responseDTO.setCode(VarList.RSP_SUCCESS);
+            responseDTO.setMessage("Data fetched successfully");
+            responseDTO.setContent(data);
 
         } catch (Exception e) {
             responseDTO.setCode(VarList.RSP_ERROR);
