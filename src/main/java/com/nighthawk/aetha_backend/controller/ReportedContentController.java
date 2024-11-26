@@ -34,7 +34,7 @@ public class ReportedContentController {
         return ResponseEntity.ok(reportedContentService.getAllPoemReports(poemId));
     }
 
-    @GetMapping("/get-all-novel-reports/{novelID}")
+    @GetMapping("/get-all-novel-reports/{novelId}")
     public ResponseEntity<ResponseDTO> getAllReportedContentForNovel(@PathVariable String novelId ){
         return ResponseEntity.ok(reportedContentService.getAllNovelReports(novelId));
     }
@@ -49,25 +49,27 @@ public class ReportedContentController {
         return ResponseEntity.ok(reportedContentService.getSingleNovelReportDetails(reportId));
     }
 
-    @PatchMapping("/decline-reportedcontent/{reportID}")
+    @PatchMapping("/decline-reportedcontent/{reportId}")
     public ResponseEntity<ResponseDTO> declineReportedContent(@PathVariable String reportId){
         return ResponseEntity.ok(reportedContentService.declineReport(reportId));
     }
 
-    @PostMapping("/report-poem")
+    @PostMapping("/report-poem/{poemId}")
     public ResponseEntity<ResponseDTO> reportPoem (
             @RequestBody PoemReportedContent poemReportedContent,
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable String poemId
     ){
-        return ResponseEntity.ok(reportedContentService.reportPoem(poemReportedContent,userDetails));
+        return ResponseEntity.ok(reportedContentService.reportPoem(poemReportedContent,userDetails,poemId));
     }
 
-    @PostMapping("/report-novel")
+    @PostMapping("/report-novel/{novelId}")
     public ResponseEntity<ResponseDTO> reportNovel (
             @RequestBody NovelReportedContent novelReportedContent,
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable String novelId
     ){
-        return ResponseEntity.ok(reportedContentService.reportNovel(novelReportedContent,userDetails));
+        return ResponseEntity.ok(reportedContentService.reportNovel(novelReportedContent,userDetails,novelId));
     }
 
 

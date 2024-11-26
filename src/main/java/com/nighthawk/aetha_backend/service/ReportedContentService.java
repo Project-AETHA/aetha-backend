@@ -89,15 +89,19 @@ public class ReportedContentService {
     public ResponseDTO getAllNovelReports(String novelId){
 
         try{
-            Novel novel = novelRepository.findById(novelId).orElseThrow(() -> new NoSuchElementException("Novel not found"));
+            Novel novel = novelRepository.findById(novelId).orElseThrow(()->new NoSuchElementException("Novel not found"));
+            System.out.println(novel);
+
             List<NovelReportedContent> novelReportedContents = novelReportedContentRepository.findByNovel(novel);
+
+            System.out.println(novelReportedContents.size());
 
             Map<String, Object> content = new HashMap<>();
             content.put("novel", novel);
             content.put("reportedList", novelReportedContents);
 
             responseDTO.setCode(VarList.RSP_SUCCESS);
-            responseDTO.setMessage("Successfull");
+            responseDTO.setMessage("Successful");
             responseDTO.setContent(content);
 
         } catch (Exception e) {
@@ -116,11 +120,9 @@ public class ReportedContentService {
             PoemReportedContent reportedContent = poemReportedContentRepository.findById(reportId)
                     .orElseThrow(() -> new ResourceNotFoundException("Report not found with ID: " + reportId));
 
-            ReportedPoemDTO poemReportedContent = modelMapper.map(reportedContent, ReportedPoemDTO.class);
-
             responseDTO.setCode(VarList.RSP_SUCCESS);
-            responseDTO.setMessage("Successfull");
-            responseDTO.setContent(poemReportedContent);
+            responseDTO.setMessage("Successful");
+            responseDTO.setContent(reportedContent);
 
         } catch (Exception e) {
 
@@ -138,11 +140,9 @@ public class ReportedContentService {
             NovelReportedContent reportedContent = novelReportedContentRepository.findById(reportId)
                     .orElseThrow(() -> new ResourceNotFoundException("Report not found with ID: " + reportId));
 
-            ReportedNovelDTO novelReportedContent = modelMapper.map(reportedContent, ReportedNovelDTO.class);
-
             responseDTO.setCode(VarList.RSP_SUCCESS);
-            responseDTO.setMessage("Successfull");
-            responseDTO.setContent(novelReportedContent);
+            responseDTO.setMessage("Successful");
+            responseDTO.setContent(reportedContent);
 
         } catch (Exception e) {
 
@@ -198,61 +198,65 @@ public class ReportedContentService {
        }
     }
 
-    public ResponseDTO reportPoem(PoemReportedContent poemReportedContent, UserDetails userDetails){
+    public ResponseDTO reportPoem(PoemReportedContent poemReportedContent, UserDetails userDetails,String poemId){
 
         try{
             AuthUser reporteduser = authUserRepository.findByEmail(userDetails.getUsername()).orElse(null);
+            Poem poem = poemRepository.findById(poemId).orElse(null);
 
-            if(reporteduser != null) {
+            if(reporteduser != null && poem != null) {
 
                 poemReportedContent.setReportedUser(reporteduser);
                 poemReportedContent.setType(ContentType.POEM);
+                poemReportedContent.setPoem(poem);
 
                 PoemReportedContent savedReport = poemReportedContentRepository.save(poemReportedContent);
 
                 responseDTO.setCode(VarList.RSP_SUCCESS);
-                responseDTO.setMessage("Successfull");
+                responseDTO.setMessage("Successful");
                 responseDTO.setContent(savedReport);
 
             } else {
 
                 responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
-                responseDTO.setMessage("User not found");
+                responseDTO.setMessage("User or Poem not found");
             }
 
         } catch (Exception e){
             responseDTO.setCode(VarList.RSP_ERROR);
-            responseDTO.setMessage("error occured");
+            responseDTO.setMessage("error occurred");
             responseDTO.setContent(e.getMessage());
         }
         return responseDTO;
     }
 
 
-    public ResponseDTO reportNovel(NovelReportedContent novelReportedContent, UserDetails userDetails) {
+    public ResponseDTO reportNovel(NovelReportedContent novelReportedContent, UserDetails userDetails, String novelId) {
 
         try{
             AuthUser reporteduser = authUserRepository.findByEmail(userDetails.getUsername()).orElse(null);
+            Novel novel = novelRepository.findById(novelId).orElse(null);
 
-            if(reporteduser != null) {
+            if(reporteduser != null && novel != null) {
 
                 novelReportedContent.setReporteduser(reporteduser);
                 novelReportedContent.setType(ContentType.NOVEL);
+                novelReportedContent.setNovel(novel);
 
                 NovelReportedContent savedReport = novelReportedContentRepository.save(novelReportedContent);
 
                 responseDTO.setCode(VarList.RSP_SUCCESS);
-                responseDTO.setMessage("Successfull");
+                responseDTO.setMessage("Successful");
                 responseDTO.setContent(savedReport);
 
             } else {
 
                 responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
-                responseDTO.setMessage("User not found");
+                responseDTO.setMessage("User or Novel not found");
             }
         } catch (Exception e){
             responseDTO.setCode(VarList.RSP_ERROR);
-            responseDTO.setMessage("error occured");
+            responseDTO.setMessage("error occurred");
             responseDTO.setContent(e.getMessage());
 
         }

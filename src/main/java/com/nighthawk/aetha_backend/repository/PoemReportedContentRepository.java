@@ -13,10 +13,12 @@ import java.util.List;
 public interface PoemReportedContentRepository extends MongoRepository<PoemReportedContent, String> {
 
     @Aggregation(pipeline = {
+            "{ '$lookup': { 'from': 'poems', 'localField': 'poem', 'foreignField': '_id', 'as': 'poemDetails' } }",
+            "{ '$unwind': '$poemDetails' }",
             "{ '$group': { " +
-                    "  '_id': '$poem.id', " +
-                    "  'poem': { '$first': '$poem' }, " +
-                    "  'reason': { '$last': '$reason' }, " +
+                    "  '_id': '$poemDetails._id', " +
+                    "  'title': { '$first': '$poemDetails.title' }, " +
+                    "  'reason': { '$first': '$reason' }, " +
                     "  'count': { '$sum': 1 }, " +
                     "  'createdAt': { '$max': '$createdAt' }" +
                     "} }",
@@ -26,4 +28,3 @@ public interface PoemReportedContentRepository extends MongoRepository<PoemRepor
 
     List<PoemReportedContent> findByPoem(Poem poem);
 }
-

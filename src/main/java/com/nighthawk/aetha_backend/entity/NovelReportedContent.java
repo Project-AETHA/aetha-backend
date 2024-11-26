@@ -21,9 +21,6 @@ public class NovelReportedContent {
     @DocumentReference(collection = "novels")
     private Novel novel;
 
-    @DocumentReference(collection = "chapters")
-    private String chapterId;
-
     //    @DocumentReference(collection = "users")
     @Indexed
     @DBRef(lazy = true)
