@@ -44,44 +44,50 @@ public class AdService {
                 throw new Exception("User not found");
             }
 
-
+            // Map fields from DTO to entity
             newAd.setCreator(user);
             newAd.setCreatedAt(new Date());
-            newAd.setTitle(adDTO.getTitle());
-            newAd.setContent(adDTO.getContent());
-            newAd.setExpiresAt(adDTO.getExpiresAt());
+            newAd.setInternalTitle(adDTO.getInternalTitle());
+            newAd.setAdType(adDTO.getAdType());
+            newAd.setBackgroundImage(adDTO.getBackgroundImage());
+            newAd.setRedirectLink(adDTO.getRedirectLink());
+            newAd.setStartDate(adDTO.getStartDate());
+            newAd.setSelectedPlan(adDTO.getSelectedPlan());
             newAd.setIsActive(true);
-            newAd.setBudget(adDTO.getBudget());
-            newAd.setPricePlan(adDTO.getPricePlan());
-            newAd.setCampaignType(adDTO.getCampaignType());
-            newAd.setImageUrl(adDTO.getImageUrl());
 
-            if (adDTO.getTitle() == null || adDTO.getTitle().isEmpty()) {
-                errors.put("title", "Title is required");
+            // Validation
+            if (adDTO.getInternalTitle() == null || adDTO.getInternalTitle().isEmpty()) {
+                errors.put("internalTitle", "Internal title is required");
             }
 
-            if (adDTO.getContent() == null || adDTO.getContent().isEmpty()) {
-                errors.put("content", "Content is required");
+            if (adDTO.getAdType() == null || adDTO.getAdType().isEmpty()) {
+                errors.put("adType", "Ad type is required");
             }
 
-            if (adDTO.getBudget() == null || adDTO.getBudget() <= 0) {
-                errors.put("budget", "Budget must be greater than zero");
+            if (adDTO.getRedirectLink() == null || adDTO.getRedirectLink().isEmpty()) {
+                errors.put("redirectLink", "Redirect link is required");
             }
 
+            if (adDTO.getStartDate() == null) {
+                errors.put("startDate", "Start date is required");
+            }
+
+            if (adDTO.getSelectedPlan() == null || adDTO.getSelectedPlan().isEmpty()) {
+                errors.put("selectedPlan", "Selected plan is required");
+            }
 
             if(errors.isEmpty()) {
+                Ad savedAd = adRepository.save(newAd);
+                AdDTO responseAdDTO = convertToDTO(savedAd);
                 responseDTO.setCode(VarList.RSP_SUCCESS);
                 responseDTO.setMessage("Ad created successfully");
-                responseDTO.setContent(adRepository.save(newAd));
+                responseDTO.setContent(responseAdDTO);
             } else {
                 responseDTO.setCode(VarList.RSP_VALIDATION_FAILED);
                 responseDTO.setMessage("Validation failed");
-                responseDTO.setContent(newAd);
+                responseDTO.setContent(null);
                 responseDTO.setErrors(errors);
             }
-
-
-
 
         } catch (Exception e) {
             responseDTO.setCode(VarList.RSP_ERROR);
@@ -103,7 +109,7 @@ public class AdService {
         } else {
             responseDTO.setCode(VarList.RSP_SUCCESS);
             responseDTO.setMessage("Ad found");
-            responseDTO.setContent(ad);
+            responseDTO.setContent(convertToDTO(ad));
         }
 
         return responseDTO;
@@ -112,7 +118,7 @@ public class AdService {
     public ResponseDTO findAllAds() {
         List<Ad> ads = adRepository.findAll();
         List<AdDTO> adDTOs = ads.stream()
-                .map(ad -> modelMapper.map(ad, AdDTO.class))
+                .map(this::convertToDTO)
                 .collect(Collectors.toList());
 
         responseDTO.setCode(VarList.RSP_SUCCESS);
@@ -132,16 +138,13 @@ public class AdService {
         } else {
             try {
                 List<Ad> ads = adRepository.findByCreator(user);
-
                 List<AdDTO> myAds = ads.stream()
-                        .map(ad -> modelMapper.map(ad, AdDTO.class))
+                        .map(this::convertToDTO)
                         .collect(Collectors.toList());
 
                 responseDTO.setCode(VarList.RSP_SUCCESS);
                 responseDTO.setContent(myAds);
-
-                if(myAds.isEmpty()) responseDTO.setMessage("No ads found");
-                else responseDTO.setMessage("Ads found");
+                responseDTO.setMessage(myAds.isEmpty() ? "No ads found" : "Ads found");
 
             } catch (Exception e) {
                 responseDTO.setCode(VarList.RSP_ERROR);
@@ -152,15 +155,6 @@ public class AdService {
 
         return responseDTO;
     }
-
-//    public List<AdDTO> searchAds(RequestDTO requestDTO) {
-//        return adRepository.searchAds(
-//                        requestDTO.getSearchTerm(),
-//                        requestDTO.getCampaignType()
-//                ).stream()
-//                .map(ad -> modelMapper.map(ad, AdDTO.class))
-//                .collect(Collectors.toList());
-//    }
 
     @Transactional
     public ResponseDTO deleteAd(String id, UserDetails userDetails) {
@@ -174,8 +168,8 @@ public class AdService {
             responseDTO.setCode(VarList.RSP_TOKEN_INVALID);
             responseDTO.setMessage("User not found");
         } else if (ad.getCreator().getId().equals(user.getId()) || user.getRole().equals("ADMIN")) {
-            if(ad.getImageUrl() != null) {
-                File file = new File("public" + ad.getImageUrl());
+            if(ad.getBackgroundImage() != null) {
+                File file = new File("public" + ad.getBackgroundImage());
                 if(file.exists()) file.delete();
             }
 
@@ -192,7 +186,6 @@ public class AdService {
 
     @Transactional
     public ResponseDTO updateAd(String id, AdDTO adDTO, UserDetails userDetails) {
-        ResponseDTO responseDTO = new ResponseDTO();
         Ad existingAd = adRepository.findById(id).orElse(null);
         AuthUser user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
 
@@ -208,7 +201,6 @@ public class AdService {
             return responseDTO;
         }
 
-        // Check if the user is the creator of the ad
         if (!existingAd.getCreator().getId().equals(user.getId())) {
             responseDTO.setCode(VarList.RSP_FAIL);
             responseDTO.setMessage("You don't have permission to update this ad");
@@ -216,33 +208,30 @@ public class AdService {
         }
 
         // Update fields if they are provided in the DTO
-        if (adDTO.getTitle() != null) {
-            existingAd.setTitle(adDTO.getTitle());
+        if (adDTO.getInternalTitle() != null) {
+            existingAd.setInternalTitle(adDTO.getInternalTitle());
         }
-        if (adDTO.getContent() != null) {
-            existingAd.setContent(adDTO.getContent());
+        if (adDTO.getAdType() != null) {
+            existingAd.setAdType(adDTO.getAdType());
         }
-        if (adDTO.getExpiresAt() != null) {
-            existingAd.setExpiresAt(adDTO.getExpiresAt());
+        if (adDTO.getBackgroundImage() != null) {
+            existingAd.setBackgroundImage(adDTO.getBackgroundImage());
         }
-        if (adDTO.getBudget() != null) {
-            existingAd.setBudget(adDTO.getBudget());
+        if (adDTO.getRedirectLink() != null) {
+            existingAd.setRedirectLink(adDTO.getRedirectLink());
         }
-        if (adDTO.getPricePlan() != null) {
-            existingAd.setPricePlan(adDTO.getPricePlan());
+        if (adDTO.getStartDate() != null) {
+            existingAd.setStartDate(adDTO.getStartDate());
         }
-        if (adDTO.getCampaignType() != null) {
-            existingAd.setCampaignType(adDTO.getCampaignType());
-        }
-        if (adDTO.getImageUrl() != null) {
-            existingAd.setImageUrl(adDTO.getImageUrl());
+        if (adDTO.getSelectedPlan() != null) {
+            existingAd.setSelectedPlan(adDTO.getSelectedPlan());
         }
 
         try {
             Ad updatedAd = adRepository.save(existingAd);
             responseDTO.setCode(VarList.RSP_SUCCESS);
             responseDTO.setMessage("Ad updated successfully");
-            responseDTO.setContent(modelMapper.map(updatedAd, AdDTO.class));
+            responseDTO.setContent(convertToDTO(updatedAd));
         } catch (Exception e) {
             responseDTO.setCode(VarList.RSP_ERROR);
             responseDTO.setMessage("Error updating ad");
@@ -252,5 +241,15 @@ public class AdService {
         return responseDTO;
     }
 
-
+    // Helper method to convert Entity to DTO
+    private AdDTO convertToDTO(Ad ad) {
+        AdDTO dto = new AdDTO();
+        dto.setInternalTitle(ad.getInternalTitle());
+        dto.setAdType(ad.getAdType());
+        dto.setBackgroundImage(ad.getBackgroundImage());
+        dto.setRedirectLink(ad.getRedirectLink());
+        dto.setStartDate(ad.getStartDate());
+        dto.setSelectedPlan(ad.getSelectedPlan());
+        return dto;
+    }
 }
