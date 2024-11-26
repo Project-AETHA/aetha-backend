@@ -7,6 +7,7 @@ import com.nighthawk.aetha_backend.entity.Chapter;
 import com.nighthawk.aetha_backend.entity.Novel;
 import com.nighthawk.aetha_backend.repository.AuthUserRepository;
 import com.nighthawk.aetha_backend.repository.ChapterRepository;
+import com.nighthawk.aetha_backend.repository.ClicksRepository;
 import com.nighthawk.aetha_backend.repository.NovelRepository;
 import com.nighthawk.aetha_backend.utils.VarList;
 import com.nighthawk.aetha_backend.utils.predefined.ContentStatus;
@@ -24,11 +25,12 @@ import java.util.NoSuchElementException;
 public class ChapterService {
 
 
-    private ResponseDTO responseDTO;
-    private ChapterRepository chapterRepository;
-    private NovelRepository novelRepository;
-    private AuthUserRepository authUserRepository;
-    private ModelMapper modelMapper;
+    private final ClicksRepository clicksRepository;
+    private final ResponseDTO responseDTO;
+    private final ChapterRepository chapterRepository;
+    private final NovelRepository novelRepository;
+    private final AuthUserRepository authUserRepository;
+    private final ModelMapper modelMapper;
 
     @Autowired
     public ChapterService (
@@ -36,13 +38,14 @@ public class ChapterService {
             ChapterRepository chapterRepository,
             NovelRepository novelRepository,
             AuthUserRepository authUserRepository,
-            ModelMapper modelMapper
-    ) {
+            ModelMapper modelMapper,
+            ClicksRepository clicksRepository) {
         this.responseDTO = responseDTO;
         this.chapterRepository = chapterRepository;
         this.novelRepository = novelRepository;
         this.authUserRepository = authUserRepository;
         this.modelMapper = modelMapper;
+        this.clicksRepository = clicksRepository;
     }
 
     //* Getting all the chapters by the novelId given
@@ -254,6 +257,29 @@ public class ChapterService {
             responseDTO.setCode(VarList.RSP_VALIDATION_FAILED);
             responseDTO.setMessage(e.getMessage());
             responseDTO.setContent(novelId);
+        } catch (Exception e) {
+            responseDTO.setCode(VarList.RSP_ERROR);
+            responseDTO.setMessage("Error occurred");
+            responseDTO.setContent(e.getMessage());
+        }
+
+        return responseDTO;
+    }
+
+    public ResponseDTO getChapterManagementData(String novelId, UserDetails userDetails) {
+
+        try {
+            AuthUser author = authUserRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new NoSuchElementException("User not found"));
+            Novel novel = novelRepository.findById(novelId).orElseThrow(() -> new NoSuchElementException("Novel not found"));
+
+            if(!author.equals(novel.getAuthor())) {
+                throw new NoSuchElementException("User not authorized");
+            }
+
+            List<Chapter> chapters = chapterRepository.findByNovel(novel);
+            int totalClicks = clicksRepository.countClicksByNovel(novel);
+
+
         } catch (Exception e) {
             responseDTO.setCode(VarList.RSP_ERROR);
             responseDTO.setMessage("Error occurred");

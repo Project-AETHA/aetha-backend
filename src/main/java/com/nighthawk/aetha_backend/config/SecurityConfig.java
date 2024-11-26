@@ -48,7 +48,9 @@ public class SecurityConfig {
                                     "/api/ebooks/**", // TODO : Check this line
                                     "/api/novels/**",
                                     "/api/chapters/**",
-                                    "/api/config/**"
+                                    "/api/config/**",
+                                    "/api/payment/success",
+                                    "/api/payment/cancel"
                             )
                             .permitAll()
                             .anyRequest().authenticated()

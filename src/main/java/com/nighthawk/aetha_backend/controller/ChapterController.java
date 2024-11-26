@@ -83,5 +83,15 @@ public class ChapterController {
         return ResponseEntity.ok(chapterService.updateChapter(chapterId, chapter, userDetails));
     }
 
+    //? Getting data to the Chapter Management Page
+    @PreAuthorize("hasRole('WRITER')")
+    @GetMapping("/management/{novelId}")
+    public ResponseEntity<ResponseDTO> getChapterManagementData(
+            @PathVariable String novelId,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        return ResponseEntity.ok(chapterService.getChapterManagementData(novelId, userDetails));
+    }
+
 
 }
