@@ -94,4 +94,21 @@ public class SubscriptionTiersService {
 
         return responseDTO;
     }
+
+    public ResponseDTO updateSubscriptionTiersForNovel(String novelId, SubscriptionTiers tiers) {
+        System.out.println(tiers);
+
+        try {
+            _subscriptionTiersRepository.save(tiers);
+            responseDTO.setCode(VarList.RSP_SUCCESS);
+            responseDTO.setMessage("Success");
+            responseDTO.setContent(null);
+        } catch (Exception e) {
+            responseDTO.setCode(VarList.RSP_ERROR);
+            responseDTO.setMessage("Failure");
+            responseDTO.setContent(e.getMessage());
+        }
+
+        return responseDTO;
+    }
 }

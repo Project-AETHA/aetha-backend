@@ -50,7 +50,8 @@ public class SecurityConfig {
                                     "/api/chapters/**",
                                     "/api/config/**",
                                     "/api/payment/success",
-                                    "/api/payment/cancel"
+                                    "/api/payment/cancel",
+                                    "/api/subscription/get-tiers/**"
                             )
                             .permitAll()
                             .anyRequest().authenticated()
