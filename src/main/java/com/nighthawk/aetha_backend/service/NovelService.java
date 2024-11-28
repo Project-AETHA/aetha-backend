@@ -1,10 +1,7 @@
 package com.nighthawk.aetha_backend.service;
 
 import com.nighthawk.aetha_backend.dto.*;
-import com.nighthawk.aetha_backend.entity.AuthUser;
-import com.nighthawk.aetha_backend.entity.Genres;
-import com.nighthawk.aetha_backend.entity.Novel;
-import com.nighthawk.aetha_backend.entity.Tags;
+import com.nighthawk.aetha_backend.entity.*;
 import com.nighthawk.aetha_backend.repository.AuthUserRepository;
 import com.nighthawk.aetha_backend.repository.ChapterRepository;
 import com.nighthawk.aetha_backend.repository.NovelRepository;
@@ -26,26 +23,44 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class NovelService {
 
+    private final ResponseDTO responseDTO;
+    private final NovelRepository novelRepository;
+    private final AuthUserRepository authUserRepository;
+    private final MongoTemplate mongoTemplate;
+    private final NotificationService notificationService;
+    private final ChapterRepository chapterRepository;
+    private final ModelMapper modelMapper;
+    private final SubscriptionTiersService subscriptionTiersService;
+
+    // Constructor Injection
     @Autowired
-    ResponseDTO responseDTO;
-    @Autowired
-    private NovelRepository novelRepository;
-    @Autowired
-    private AuthUserRepository authUserRepository;
-    @Autowired
-    private MongoTemplate mongoTemplate;
-    @Autowired
-    private NotificationService notificationService;
-    @Autowired
-    private ChapterRepository chapterRepository;
-    @Autowired
-    private ModelMapper modelMapper;
+    public NovelService(
+            ResponseDTO responseDTO,
+            NovelRepository novelRepository,
+            AuthUserRepository authUserRepository,
+            MongoTemplate mongoTemplate,
+            NotificationService notificationService,
+            ChapterRepository chapterRepository,
+            ModelMapper modelMapper,
+            SubscriptionTiersService subscriptionTiersService
+    ) {
+        this.responseDTO = responseDTO;
+        this.novelRepository = novelRepository;
+        this.authUserRepository = authUserRepository;
+        this.mongoTemplate = mongoTemplate;
+        this.notificationService = notificationService;
+        this.chapterRepository = chapterRepository;
+        this.modelMapper = modelMapper;
+        this.subscriptionTiersService = subscriptionTiersService;
+    }
 
     public ResponseDTO createNovel(NovelDTO novelDTO, UserDetails userDetails) {
 
@@ -116,6 +131,30 @@ public class NovelService {
             //? TODO - Manual release date
 
             if(errors.isEmpty()) {
+
+                //? Create default subscription tiers
+
+                SubscriptionTiers subscriptionTiers = SubscriptionTiers.builder()
+                        .novel(novel)
+                        .tier1_name("Basic")
+                        .tier1_description("Basic subscription")
+                        .tier1_features(Arrays.asList("Basic feature 01", "Basic feature 02"))
+                        .tier1_duration(4)
+                        .tier1_price(5.0)
+                        .tier2_name("Standard")
+                        .tier2_description("Standard subscription")
+                        .tier2_features(Arrays.asList("Standard feature 01", "Standard feature 02", "Standard feature 03"))
+                        .tier2_duration(8)
+                        .tier2_price(10.0)
+                        .tier3_name("Premium")
+                        .tier3_description("Premium subscription")
+                        .tier3_features(Arrays.asList("Premium feature 01", "Premium feature 02", "Premium feature 03", "Premium feature 04"))
+                        .tier3_duration(12)
+                        .tier3_price(20.0)
+                        .build();
+
+                subscriptionTiersService.createSubscriptionTiers(subscriptionTiers);
+
                 responseDTO.setCode(VarList.RSP_SUCCESS);
                 responseDTO.setMessage("Novel created successfully");
                 responseDTO.setContent(novelRepository.save(novel));
@@ -312,9 +351,14 @@ public class NovelService {
             AuthUser user = authUserRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new RuntimeException("User not found"));
             List<Novel> novels = novelRepository.findByAuthor(user);
 
+            HashMap<String, Object> categorizedNovels = new HashMap<>();
+            categorizedNovels.put("published", novels.stream().filter(novel -> novel.getStatus() == ContentStatus.PUBLISHED).collect(Collectors.toList()));
+            categorizedNovels.put("draft", novels.stream().filter(novel -> novel.getStatus() == ContentStatus.DRAFT).collect(Collectors.toList()));
+            categorizedNovels.put("pending", novels.stream().filter(novel -> novel.getStatus() == ContentStatus.PENDING).collect(Collectors.toList()));
+
             responseDTO.setCode(VarList.RSP_SUCCESS);
             responseDTO.setMessage("Novels fetched successfully");
-            responseDTO.setContent(novels);
+            responseDTO.setContent(categorizedNovels);
         } catch (Exception e) {
             responseDTO.setCode(VarList.RSP_ERROR);
             responseDTO.setMessage("Error fetching novels");

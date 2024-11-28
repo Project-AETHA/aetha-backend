@@ -48,24 +48,6 @@ public class SubscriptionTiersService {
         }
     }
 
-    public boolean updateSubscriptionTiers(SubscriptionTiers subscriptionTiers, String subscriptionTiersId) {
-        try {
-            SubscriptionTiers previousSubscriptionTiers = _subscriptionTiersRepository.findById(subscriptionTiersId)
-                    .orElseThrow(() -> new NoSuchElementException("Subscription tiers not found"));
-
-            if(subscriptionTiers.getId() == null) {
-                logger.warn("Subscription tiers id is null, setting the previous id : {}", previousSubscriptionTiers.getId());
-                subscriptionTiers.setId(previousSubscriptionTiers.getId());
-            }
-
-            _subscriptionTiersRepository.save(subscriptionTiers);
-            return true;
-        } catch (Exception e) {
-            logger.error("Error while updating subscription tiers : {}", e.getMessage());
-            return false;
-        }
-    }
-
     public boolean deleteSubscriptionTier(String subscriptionTiersId) {
         try {
             _subscriptionTiersRepository.deleteById(subscriptionTiersId);
@@ -96,7 +78,6 @@ public class SubscriptionTiersService {
     }
 
     public ResponseDTO updateSubscriptionTiersForNovel(String novelId, SubscriptionTiers tiers) {
-        System.out.println(tiers);
 
         try {
             _subscriptionTiersRepository.save(tiers);

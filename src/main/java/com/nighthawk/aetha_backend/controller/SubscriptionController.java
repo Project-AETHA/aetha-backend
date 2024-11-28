@@ -54,4 +54,13 @@ public class SubscriptionController {
         return ResponseEntity.ok(_subscriptionTiersService.updateSubscriptionTiersForNovel(novelId, tiers));
     }
 
+    //? Check if the logged in user is subscribed to the given novel
+    @GetMapping("/check/{novelId}")
+    public ResponseEntity<ResponseDTO> checkSubscription(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable String novelId
+    ) {
+        return ResponseEntity.ok(_subscriptionService.checkSubscription(userDetails, novelId));
+    }
+
 }
