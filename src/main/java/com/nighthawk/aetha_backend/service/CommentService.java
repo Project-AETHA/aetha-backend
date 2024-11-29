@@ -4,8 +4,8 @@ import com.nighthawk.aetha_backend.dto.CommentDTO;
 import com.nighthawk.aetha_backend.dto.ResponseDTO;
 import com.nighthawk.aetha_backend.entity.Comment;
 import com.nighthawk.aetha_backend.entity.AuthUser;
-import com.nighthawk.aetha_backend.entity.Novel;
-import com.nighthawk.aetha_backend.repository.NovelRepository;
+import com.nighthawk.aetha_backend.entity.Chapter;
+import com.nighthawk.aetha_backend.repository.ChapterRepository;
 import com.nighthawk.aetha_backend.repository.CommentRepository;
 import com.nighthawk.aetha_backend.repository.AuthUserRepository;
 import com.nighthawk.aetha_backend.utils.VarList;
@@ -30,7 +30,7 @@ public class CommentService {
     private AuthUserRepository userRepository;
 
     @Autowired
-    private NovelRepository novelRepository;
+    private ChapterRepository chapterRepository;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -58,11 +58,11 @@ public class CommentService {
         try {
 
             AuthUser user = userRepository.findByEmail(userDetails.getUsername()).get();
-            Novel novel = novelRepository.findById(commentDTO.getNovel()).get();
+            Chapter chapter = chapterRepository.findById(commentDTO.getChapter()).get();
 
             Comment comment = modelMapper.map(commentDTO, Comment.class);
             comment.setUser(user);
-            comment.setNovel(novel);
+            comment.setChapter(chapter);
             commentRepository.save(comment);
 
             responseDTO.setCode(VarList.RSP_SUCCESS);
@@ -70,7 +70,7 @@ public class CommentService {
             responseDTO.setContent(comment);
         }   catch (NoSuchElementException e) {
             responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
-            responseDTO.setMessage("User or Novel not found.");
+            responseDTO.setMessage("User or Chapter of Novel not found.");
             responseDTO.setContent(null);
         } catch (Exception e) {
             responseDTO.setCode(VarList.RSP_FAIL);
@@ -82,42 +82,46 @@ public class CommentService {
     }
 
     @Transactional
-    public ResponseDTO getComment() {
-        
+    public ResponseDTO getCommentById(String chapterId, UserDetails userDetails) {
         try {
-            List<Comment> comments = commentRepository.findAll();
 
+            AuthUser user = userRepository.findByEmail(userDetails.getUsername()).get();
+            Chapter chapter = chapterRepository.findById(chapterId).get();
+
+            List<Comment> comments = commentRepository.findByChapterAndUser(chapter, user);
             responseDTO.setCode(VarList.RSP_SUCCESS);
-            responseDTO.setMessage("Comments retrieved successfully.");
+            responseDTO.setMessage("Your Personal Comments retrieved succesfully");
             responseDTO.setContent(comments);
-     }  catch (Exception e) {
-            responseDTO.setCode(VarList.RSP_ERROR);
-            responseDTO.setMessage("Error fetching comment");
-            responseDTO.setContent(e.getMessage());
-     }
-
-        return responseDTO;
-
-    }
-        
-
-    @Transactional
-    public ResponseDTO getCommentById(String id) { 
-        try {
-            Optional<Comment> comment = commentRepository.findById(id);
-            if (comment.isPresent()) {
-                CommentDTO commentDTO = modelMapper.map(comment.get(), CommentDTO.class);
-                responseDTO.setCode(VarList.RSP_SUCCESS);
-                responseDTO.setMessage("Comment found.");
-                responseDTO.setContent(commentDTO);
-            } else {
-                responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
-                responseDTO.setMessage("Comment not found.");
-                responseDTO.setContent(null);
-            }
+        } catch (NoSuchElementException e) {
+            responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
+            responseDTO.setMessage("User or Chapter of Novel not found.");
+            responseDTO.setContent(null);
         } catch (Exception e) {
             responseDTO.setCode(VarList.RSP_FAIL);
-            responseDTO.setMessage("Error finding comment: " + e.getMessage());
+            responseDTO.setMessage("Error finding comments: " + e.getMessage());
+            responseDTO.setContent(null);
+        }
+
+        return responseDTO;
+    }
+
+    @Transactional
+    public ResponseDTO getComments(String chapterId) {
+        try {
+
+            Chapter chapter = chapterRepository.findById(chapterId).get();
+
+            List<Comment> comments = commentRepository.findByChapter(chapter);
+            responseDTO.setCode(VarList.RSP_SUCCESS);
+            responseDTO.setMessage("Comments retrieved succesfully");
+            responseDTO.setContent(comments);
+        } catch (NoSuchElementException e) {
+            responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
+            responseDTO.setMessage("User or Chapter of Novel not found.");
+            responseDTO.setContent(null);
+        } catch (Exception e) {
+            responseDTO.setCode(VarList.RSP_FAIL);
+            responseDTO.setMessage("Error finding comments: " + e.getMessage());
             responseDTO.setContent(null);
         }
 
