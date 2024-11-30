@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -120,6 +121,40 @@ public class SubscriptionService {
             responseDTO.setCode(VarList.RSP_ERROR);
             responseDTO.setMessage("Error Occurred");
             responseDTO.setContent(e.getMessage());
+        }
+
+        return responseDTO;
+    }
+
+    public ResponseDTO checkSubscription(UserDetails userDetails, String novelId) {
+
+        try {
+
+            AuthUser user = _authUserRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new NoSuchElementException("User not found"));
+            Novel novel = _novelRepository.findById(novelId).orElseThrow(() -> new NoSuchElementException("Novel not found"));
+
+            Subscription subscription = _subscriptionRepository.findByUserAndNovel(user, novel).orElseThrow(() -> new NoSuchElementException("Subscription not found"));
+
+            if (LocalDate.now().isAfter(subscription.getEndDate())) {
+                throw new IllegalStateException("Subscription expired");
+            }
+
+            responseDTO.setCode(VarList.RSP_SUCCESS);
+            responseDTO.setMessage("Success");
+            responseDTO.setContent(true);
+
+        } catch (NoSuchElementException e) {
+            responseDTO.setCode(VarList.RSP_ERROR);
+            responseDTO.setMessage("Subscription not found");
+            responseDTO.setContent(e.getMessage());
+        } catch (IllegalStateException e) {
+            responseDTO.setCode(VarList.RSP_SUCCESS);
+            responseDTO.setMessage("Subscription Expired");
+            responseDTO.setContent(false);
+        } catch (Exception e) {
+            responseDTO.setCode(VarList.RSP_ERROR);
+            responseDTO.setMessage("Error Occurred");
+            responseDTO.setContent(false);
         }
 
         return responseDTO;

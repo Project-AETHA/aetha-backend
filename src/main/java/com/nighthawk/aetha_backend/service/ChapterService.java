@@ -5,30 +5,35 @@ import com.nighthawk.aetha_backend.dto.ResponseDTO;
 import com.nighthawk.aetha_backend.entity.AuthUser;
 import com.nighthawk.aetha_backend.entity.Chapter;
 import com.nighthawk.aetha_backend.entity.Novel;
-import com.nighthawk.aetha_backend.repository.AuthUserRepository;
-import com.nighthawk.aetha_backend.repository.ChapterRepository;
-import com.nighthawk.aetha_backend.repository.NovelRepository;
+import com.nighthawk.aetha_backend.entity.SubscriptionTiers;
+import com.nighthawk.aetha_backend.repository.*;
 import com.nighthawk.aetha_backend.utils.VarList;
 import com.nighthawk.aetha_backend.utils.predefined.ContentStatus;
+import org.bson.types.ObjectId;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
+@Transactional
 public class ChapterService {
 
 
-    private ResponseDTO responseDTO;
-    private ChapterRepository chapterRepository;
-    private NovelRepository novelRepository;
-    private AuthUserRepository authUserRepository;
-    private ModelMapper modelMapper;
+    private final ClicksRepository clicksRepository;
+    private final ResponseDTO responseDTO;
+    private final ChapterRepository chapterRepository;
+    private final NovelRepository novelRepository;
+    private final AuthUserRepository authUserRepository;
+    private final ModelMapper modelMapper;
+    private final SubscriptionTiersRepository subscriptionTiersRepository;
 
     @Autowired
     public ChapterService (
@@ -36,13 +41,15 @@ public class ChapterService {
             ChapterRepository chapterRepository,
             NovelRepository novelRepository,
             AuthUserRepository authUserRepository,
-            ModelMapper modelMapper
-    ) {
+            ModelMapper modelMapper,
+            ClicksRepository clicksRepository, SubscriptionTiersRepository subscriptionTiersRepository) {
         this.responseDTO = responseDTO;
         this.chapterRepository = chapterRepository;
         this.novelRepository = novelRepository;
         this.authUserRepository = authUserRepository;
         this.modelMapper = modelMapper;
+        this.clicksRepository = clicksRepository;
+        this.subscriptionTiersRepository = subscriptionTiersRepository;
     }
 
     //* Getting all the chapters by the novelId given
@@ -170,7 +177,7 @@ public class ChapterService {
             return responseDTO;
     }
 
-    public ResponseDTO updateChapter(String chapterId, Chapter chapter, UserDetails userDetails) {
+    public ResponseDTO updateChapter(String chapterId, Chapter chapter, UserDetails userDetails, boolean isComplete) {
 
             try {
                 //? Get the chapter by the chapterId given
@@ -186,6 +193,13 @@ public class ChapterService {
                 if(chapter.getChapterNumber() != null) existingChapter.setChapterNumber(chapter.getChapterNumber());
                 if(chapter.getContent() != null) existingChapter.setContent(chapter.getContent());
                 if(chapter.getRate() != null) existingChapter.setRate(chapter.getRate());
+
+                if(isComplete) {
+                    existingChapter.setStatus(ContentStatus.COMPLETED);
+                } else {
+                    existingChapter.setStatus(ContentStatus.DRAFT);
+                    existingChapter.setIsVisible(false);
+                }
 
                 responseDTO.setCode(VarList.RSP_SUCCESS);
                 responseDTO.setMessage("Chapter content updated successfully");
@@ -254,6 +268,39 @@ public class ChapterService {
             responseDTO.setCode(VarList.RSP_VALIDATION_FAILED);
             responseDTO.setMessage(e.getMessage());
             responseDTO.setContent(novelId);
+        } catch (Exception e) {
+            responseDTO.setCode(VarList.RSP_ERROR);
+            responseDTO.setMessage("Error occurred");
+            responseDTO.setContent(e.getMessage());
+        }
+
+        return responseDTO;
+    }
+
+    public ResponseDTO getChapterManagementData(String novelId, UserDetails userDetails) {
+
+        try {
+            AuthUser author = authUserRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new NoSuchElementException("User not found"));
+            Novel novel = novelRepository.findById(novelId).orElseThrow(() -> new NoSuchElementException("Novel not found"));
+
+            if(!author.equals(novel.getAuthor())) {
+                throw new NoSuchElementException("User not authorized");
+            }
+
+            List<Chapter> chapters = chapterRepository.findByNovel(novel);
+            int totalClicks = clicksRepository.countClicksByNovel(novel);
+            SubscriptionTiers tiers = subscriptionTiersRepository.findByNovelId(novel.getId()).orElseThrow(() -> new NoSuchElementException("Subscription tiers not found"));
+            tiers.setNovel(novel);
+
+            HashMap<String, Object> data = new HashMap<>();
+            data.put("chapters", chapters);
+            data.put("clicks", totalClicks);
+            data.put("tiers", tiers);
+
+            responseDTO.setCode(VarList.RSP_SUCCESS);
+            responseDTO.setMessage("Data fetched successfully");
+            responseDTO.setContent(data);
+
         } catch (Exception e) {
             responseDTO.setCode(VarList.RSP_ERROR);
             responseDTO.setMessage("Error occurred");

@@ -2,8 +2,10 @@ package com.nighthawk.aetha_backend.controller;
 
 import com.nighthawk.aetha_backend.dto.ResponseDTO;
 import com.nighthawk.aetha_backend.dto.SubscriptionDTO;
+import com.nighthawk.aetha_backend.entity.SubscriptionTiers;
 import com.nighthawk.aetha_backend.service.SubscriptionService;
 import com.nighthawk.aetha_backend.service.SubscriptionTiersService;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -45,6 +47,20 @@ public class SubscriptionController {
             @PathVariable String novelId
     ) {
         return ResponseEntity.ok(_subscriptionTiersService.getSubscriptionTiersForNovel(novelId));
+    }
+
+    @PutMapping("/edit-tiers/{novelId}")
+    public ResponseEntity<ResponseDTO> updateSubscriptionTiers(@PathVariable String novelId, @RequestBody SubscriptionTiers tiers) {
+        return ResponseEntity.ok(_subscriptionTiersService.updateSubscriptionTiersForNovel(novelId, tiers));
+    }
+
+    //? Check if the logged in user is subscribed to the given novel
+    @GetMapping("/check/{novelId}")
+    public ResponseEntity<ResponseDTO> checkSubscription(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable String novelId
+    ) {
+        return ResponseEntity.ok(_subscriptionService.checkSubscription(userDetails, novelId));
     }
 
 }

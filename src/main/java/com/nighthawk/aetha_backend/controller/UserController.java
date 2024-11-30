@@ -64,6 +64,9 @@ public class UserController {
         return ResponseEntity.ok(userService.disableUser(email));
     }
 
-
-
+//    @PreAuthorize("hasRole('READER')")
+    @GetMapping("/upgrade")
+    public ResponseEntity<ResponseDTO> upgradeUser(@AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(userService.upgradeUser(userDetails));
+    }
 }
