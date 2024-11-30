@@ -91,22 +91,49 @@ public class RatingService {
     }
 
     @Transactional
-    public ResponseDTO getRating() {
-        
+    public ResponseDTO getRatings(String novelId) {
         try {
-            List<Rating> rating = ratingRepository.findAll();
 
+            Novel novel = novelRepository.findById(novelId).get();
+
+            List<Rating> ratings = ratingRepository.findByNovel(novel);
             responseDTO.setCode(VarList.RSP_SUCCESS);
-            responseDTO.setMessage("Ratings retrieved successfully.");
-            responseDTO.setContent(rating);
-     }  catch (Exception e) {
-            responseDTO.setCode(VarList.RSP_ERROR);
-            responseDTO.setMessage("Error fetching Rating");
-            responseDTO.setContent(e.getMessage());
-     }
+            responseDTO.setMessage("All ratings retrieved.");
+            responseDTO.setContent(ratings);
+        } catch (NoSuchElementException e) {
+            responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
+            responseDTO.setMessage("Novel not found.");
+            responseDTO.setContent(null);
+        } catch (Exception e) {
+            responseDTO.setCode(VarList.RSP_FAIL);
+            responseDTO.setMessage("Error finding ratings: " + e.getMessage());
+            responseDTO.setContent(null);
+        }
+        return responseDTO;
+    }
+
+    @Transactional
+    public ResponseDTO getRatingsById(String novelId, UserDetails userDetails) {
+        try {
+
+            AuthUser user = userRepository.findByEmail(userDetails.getUsername()).get();
+            Novel novel = novelRepository.findById(novelId).get();
+
+            List<Rating> ratings = ratingRepository.findByNovelAndUser(novel, user);
+            responseDTO.setCode(VarList.RSP_SUCCESS);
+            responseDTO.setMessage("All personal ratings retrieved.");
+            responseDTO.setContent(ratings);
+        } catch (NoSuchElementException e) {
+            responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
+            responseDTO.setMessage("Novel not found.");
+            responseDTO.setContent(null);
+        } catch (Exception e) {
+            responseDTO.setCode(VarList.RSP_FAIL);
+            responseDTO.setMessage("Error finding personal ratings: " + e.getMessage());
+            responseDTO.setContent(null);
+        }
 
         return responseDTO;
-
     }
         
 

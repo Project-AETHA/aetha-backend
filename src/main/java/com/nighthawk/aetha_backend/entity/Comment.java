@@ -3,7 +3,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.DocumentReference;
 
@@ -20,8 +19,8 @@ public class Comment {
         private String id;
         private String content;
 
-        @DocumentReference(collection = "novels")
-        private Novel novel;
+        @DocumentReference(collection = "chapters")
+        private Chapter chapter;
 
         @DocumentReference(collection = "users")
         private AuthUser user;

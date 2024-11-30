@@ -24,10 +24,32 @@ public class CommentController {
         this.responseDTO = responseDTO;
     }
 
-    @GetMapping("/getComment")
-    public ResponseEntity<ResponseDTO> getComment() {
-        return new ResponseEntity<>(commentService.getComment(), HttpStatus.OK);
+    @GetMapping("/getComment/personal")
+    public ResponseEntity<ResponseDTO> getCommentById(@RequestParam String chapterId, @AuthenticationPrincipal UserDetails userDetails) {
+        ResponseDTO response = new ResponseDTO();
+        try {
+            response = commentService.getCommentById(chapterId, userDetails);
+        } catch (Exception e) {
+            response.setCode(VarList.RSP_ERROR);
+            response.setMessage("Error getting comment");
+            response.setContent(null);
+        }
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+    @GetMapping("/getComments")
+    public ResponseEntity<ResponseDTO> getComments(@RequestParam String chapterId) {
+        ResponseDTO response = new ResponseDTO();
+        try {
+            response = commentService.getComments(chapterId);
+        } catch (Exception e) {
+            response.setCode(VarList.RSP_ERROR);
+            response.setMessage("Error getting comment");
+            response.setContent(null);
+        }
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+  
   
 
     @PostMapping("/saveComment")
