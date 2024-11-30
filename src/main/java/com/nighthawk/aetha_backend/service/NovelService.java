@@ -62,7 +62,7 @@ public class NovelService {
         this.subscriptionTiersService = subscriptionTiersService;
     }
 
-    public ResponseDTO createNovel(NovelDTO novelDTO, UserDetails userDetails) {
+    public ResponseDTO createNovel(NovelDTO novelDTO, UserDetails userDetails, boolean isDraft) {
 
         HashMap<String, String> errors = new HashMap<>();
         Novel novel = new Novel();
@@ -126,16 +126,25 @@ public class NovelService {
             }
 
             novel.setAuthor(authUserRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new RuntimeException("Author not found")));
-            novelDTO.setStatus(ContentStatus.PENDING);
+
+            if(isDraft) novel.setStatus(ContentStatus.DRAFT);
+            else {
+                Novel draftNovel = novelRepository.findByAuthorAndTitleAndStatus(novel.getAuthor(), novel.getTitle(), ContentStatus.DRAFT).orElse(null);
+
+                if(draftNovel != null) novel.setId(draftNovel.getId());
+                novel.setStatus(ContentStatus.PENDING);
+            }
 
             //? TODO - Manual release date
 
             if(errors.isEmpty()) {
 
+                Novel savedNovel = novelRepository.save(novel);
+
                 //? Create default subscription tiers
 
                 SubscriptionTiers subscriptionTiers = SubscriptionTiers.builder()
-                        .novel(novel)
+                        .novel(savedNovel)
                         .tier1_name("Basic")
                         .tier1_description("Basic subscription")
                         .tier1_features(Arrays.asList("Basic feature 01", "Basic feature 02"))
@@ -157,7 +166,7 @@ public class NovelService {
 
                 responseDTO.setCode(VarList.RSP_SUCCESS);
                 responseDTO.setMessage("Novel created successfully");
-                responseDTO.setContent(novelRepository.save(novel));
+                responseDTO.setContent(savedNovel);
             } else {
                 responseDTO.setCode(VarList.RSP_VALIDATION_FAILED);
                 responseDTO.setMessage("Validation failed");

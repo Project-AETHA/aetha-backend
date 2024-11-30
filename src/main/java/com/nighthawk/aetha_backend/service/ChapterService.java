@@ -177,7 +177,7 @@ public class ChapterService {
             return responseDTO;
     }
 
-    public ResponseDTO updateChapter(String chapterId, Chapter chapter, UserDetails userDetails) {
+    public ResponseDTO updateChapter(String chapterId, Chapter chapter, UserDetails userDetails, boolean isComplete) {
 
             try {
                 //? Get the chapter by the chapterId given
@@ -193,6 +193,13 @@ public class ChapterService {
                 if(chapter.getChapterNumber() != null) existingChapter.setChapterNumber(chapter.getChapterNumber());
                 if(chapter.getContent() != null) existingChapter.setContent(chapter.getContent());
                 if(chapter.getRate() != null) existingChapter.setRate(chapter.getRate());
+
+                if(isComplete) {
+                    existingChapter.setStatus(ContentStatus.COMPLETED);
+                } else {
+                    existingChapter.setStatus(ContentStatus.DRAFT);
+                    existingChapter.setIsVisible(false);
+                }
 
                 responseDTO.setCode(VarList.RSP_SUCCESS);
                 responseDTO.setMessage("Chapter content updated successfully");
