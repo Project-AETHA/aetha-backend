@@ -106,7 +106,16 @@
             <artifactId>spring-boot-starter-oauth2-client</artifactId>
         </dependency>
 
+        <!--    Stripe Dependency-->
+        <dependency>
+            <groupId>com.stripe</groupId>
+            <artifactId>stripe-java</artifactId>
+            <version>28.1.0</version>
+        </dependency>
+
     </dependencies>
+
+
 
     <build>
         <plugins>

@@ -103,3 +103,8 @@ logging:
       total-size-cap: 100MB
       max-history: 7
       clean-history-on-start: true
+
+stripe:
+  secretKey: "sk_test_51QRF0PLARPgxtdfuEkbEM48Ca7qf5lcOpt0xKDPaW8JE4tsEct3bxmGAlWUFWk0xMtjBVYrAWwCww4dVVsX8royF00NzEEA87Y"
+
+
