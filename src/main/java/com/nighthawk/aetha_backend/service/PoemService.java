@@ -186,7 +186,7 @@ public class PoemService {
         return responseDTO;
     }
 
-    public ResponseDTO updateUpvote(String id, UserDetails userDetails){
+    public ResponseDTO updateUpvote(String id, UserDetails userDetails, boolean increment){
 
         AuthUser user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
 
@@ -198,7 +198,11 @@ public class PoemService {
             responseDTO.setMessage("Poem not found");
         } else {
             Integer upvotes = poem.getUpvotes();
-            upvotes += 1;
+
+            if(upvotes == null) upvotes = 0;
+
+            if(increment) upvotes += 1;
+            else upvotes -= 1;
 
             poem.setUpvotes(upvotes);
 
@@ -228,7 +232,7 @@ public class PoemService {
     }
 
 
-    public ResponseDTO updateDownvote(String id, UserDetails userDetails){
+    public ResponseDTO updateDownvote(String id, UserDetails userDetails, boolean increment){
 
         AuthUser user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
 
@@ -240,7 +244,11 @@ public class PoemService {
             responseDTO.setMessage("Poem not found");
         } else {
             Integer downvotes = poem.getDownvotes();
-            downvotes += 1;
+
+            if(downvotes == null) downvotes = 0;
+
+            if(increment) downvotes += 1;
+            else downvotes -= 1;
 
             poem.setUpvotes(downvotes);
 

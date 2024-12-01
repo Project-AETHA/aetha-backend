@@ -28,4 +28,9 @@ public class StatController {
     public ResponseEntity<ResponseDTO> getStatistics (){
         return ResponseEntity.ok(statService.getStatistics());
     }
+
+    @GetMapping("/admin-contentmanagement")
+    public ResponseEntity<ResponseDTO> getContentCount() {
+        return ResponseEntity.ok(statService.getContentCount());
+    }
 }
