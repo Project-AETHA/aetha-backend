@@ -21,14 +21,12 @@ public class Ad {
     @Indexed
     private AuthUser creator;
 
-    private String content;
-    private Date createdAt;
-    private Date expiresAt;
-    private Boolean isActive;
-    private String imageUrl;
-    private Double budget;
-    private String pricePlan;
-    private String campaignType;
+    private String internalTitle;
+    private String adType;
+    private String backgroundImage;
+    private String redirectLink;
+    private Date startDate;
+    private String selectedPlan;
 
     // Additional fields for tracking metrics
     private Integer impressions = 0;       // Number of times the ad has been viewed
@@ -49,6 +47,12 @@ public class Ad {
     private String description;            // Description of the ad campaign (optional)
     private String category;               // Ad category (e.g., "Technology", "Lifestyle")
     private Boolean isValidUpload;         // Image or Text validation (for background uploads)
+
+    public void setCreatedAt(Date date) {
+    }
+
+    public void setIsActive(boolean b) {
+    }
 
     // Constructors, getters, and setters can be generated automatically by Lombok
 }

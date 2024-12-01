@@ -11,10 +11,11 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class CommentDTO {
+public class RatingDTO {
     private String id;
+    private Integer rating;
     private String content;
-    private String chapter;
+    private String novel;
     private String user;
     private LocalDate createdAt = new Date().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 }

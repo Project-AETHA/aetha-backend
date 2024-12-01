@@ -1,14 +1,13 @@
-# Use the official OpenJDK image as the base image
-FROM openjdk:17
+FROM bellsoft/liberica-openjdk-alpine:17 AS builder
 
-# Expose port 8080 to the outside world
+WORKDIR /home/app/aetha
+ADD ./ /home/app/aetha
+RUN chmod +x mvnw
+RUN ./mvnw -Dmaven.test.skip=true clean package
+
+FROM bellsoft/liberica-openjre-alpine:17
+
+WORKDIR /home/app
 EXPOSE 8080
-
-# Define the JAR file name as an argument
-ARG JAR_FILE=target/aetha_backend-0.0.1-SNAPSHOT.jar
-
-# Copy the JAR file to the container
-COPY ${JAR_FILE} app.jar
-
-# Specify the entry point to run the application
-ENTRYPOINT ["java", "-jar", "/app.jar"]
+ENTRYPOINT ["java", "-jar", "aetha.jar"]
+COPY --from=builder /home/app/aetha/target/*.jar aetha.jar

@@ -34,8 +34,12 @@ public class NovelController {
 
     // ? Creating a novel
     @PostMapping("/create")
-    public ResponseEntity<ResponseDTO> createNovel(@RequestBody NovelDTO novelDTO, @AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(novelService.createNovel(novelDTO, userDetails));
+    public ResponseEntity<ResponseDTO> createNovel(
+            @RequestBody NovelDTO novelDTO,
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(defaultValue = "false") boolean isDraft
+    ) {
+        return ResponseEntity.ok(novelService.createNovel(novelDTO, userDetails, isDraft));
     }
 
     // ? Update a novel

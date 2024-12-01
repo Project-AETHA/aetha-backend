@@ -78,9 +78,20 @@ public class ChapterController {
     public ResponseEntity<ResponseDTO> updateChapter(
             @PathVariable String chapterId,
             @RequestBody Chapter chapter,
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(defaultValue = "false") boolean isComplete
+    ) {
+        return ResponseEntity.ok(chapterService.updateChapter(chapterId, chapter, userDetails, isComplete));
+    }
+
+    //? Getting data to the Chapter Management Page
+    @PreAuthorize("hasRole('WRITER')")
+    @GetMapping("/management/{novelId}")
+    public ResponseEntity<ResponseDTO> getChapterManagementData(
+            @PathVariable String novelId,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        return ResponseEntity.ok(chapterService.updateChapter(chapterId, chapter, userDetails));
+        return ResponseEntity.ok(chapterService.getChapterManagementData(novelId, userDetails));
     }
 
 

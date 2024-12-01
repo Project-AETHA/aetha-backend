@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static com.nighthawk.aetha_backend.utils.StatusList.PENDING;
 
@@ -20,4 +21,5 @@ public interface NovelRepository extends MongoRepository<Novel, String> {
     long countByStatus(StatusList status);
     long countByPublishedAtBetween(LocalDate startDate, LocalDate endDate);
     List<Novel> findByStatus(ContentStatus status);
+    Optional<Novel> findByAuthorAndTitleAndStatus(AuthUser author, String title, ContentStatus contentStatus);
 }
