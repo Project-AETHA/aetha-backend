@@ -106,10 +106,13 @@ public class CommentService {
     }
 
     @Transactional
-    public ResponseDTO getComments(String chapterId) {
+    public ResponseDTO getComments(String novelId, Integer chapterNumber) {
         try {
 
-            Chapter chapter = chapterRepository.findById(chapterId).get();
+            Optional<Chapter> chapters = chapterRepository.findByNovelIdAndChapterNumber(novelId, chapterNumber);
+
+            //convert Optional to Chapter
+            Chapter chapter = chapters.get();
 
             List<Comment> comments = commentRepository.findByChapter(chapter);
             responseDTO.setCode(VarList.RSP_SUCCESS);

@@ -38,10 +38,10 @@ public class CommentController {
     }
 
     @GetMapping("/getComments")
-    public ResponseEntity<ResponseDTO> getComments(@RequestParam String chapterId) {
+    public ResponseEntity<ResponseDTO> getComments(@RequestParam String novelId, @RequestParam Integer chapterNumber) {
         ResponseDTO response = new ResponseDTO();
         try {
-            response = commentService.getComments(chapterId);
+            response = commentService.getComments(novelId, chapterNumber);
         } catch (Exception e) {
             response.setCode(VarList.RSP_ERROR);
             response.setMessage("Error getting comment");
