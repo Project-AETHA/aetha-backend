@@ -36,25 +36,40 @@ public class FavService {
         this.userRepository = userRepository;
     }
 
-    public ResponseDTO addFavPoem(String poemId, UserDetails userDetails) {
+    public ResponseDTO addFavPoem(String poemId, UserDetails userDetails, boolean setFav) {
 
         try {
             AuthUser user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(()-> new NoSuchElementException("User not found"));
             Poem poem = poemRepository.findById(poemId).orElseThrow(()-> new NoSuchElementException("Poem not found"));
 
-            FavPoem favPoem = new FavPoem();
-            favPoem.setPoem(poem);
-            favPoem.setUser(user);
+            FavPoem previousFavPoem = favPoemRepository.findByPoemAndUser(poem, user);
 
-            favPoemRepository.save(favPoem);
+            if(setFav) {
+                if(previousFavPoem != null) throw new IllegalArgumentException("Poem already added to favourites");
 
-            responseDTO.setCode(VarList.RSP_SUCCESS);
-            responseDTO.setMessage("Poem added to favourites successfully");
-            responseDTO.setContent(favPoem);
+                FavPoem favPoem = new FavPoem();
+                favPoem.setPoem(poem);
+                favPoem.setUser(user);
+
+                favPoemRepository.save(favPoem);
+
+                responseDTO.setCode(VarList.RSP_SUCCESS);
+                responseDTO.setMessage("Poem added/removed to favourites successfully");
+                responseDTO.setContent(favPoem);
+            } else {
+
+                favPoemRepository.delete(previousFavPoem);
+
+                responseDTO.setCode(VarList.RSP_SUCCESS);
+                responseDTO.setMessage("Poem added/removed to favourites successfully");
+                responseDTO.setContent(previousFavPoem);
+            }
+
+
 
         } catch (NoSuchElementException e) {
             responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
-            responseDTO.setMessage("User not found");
+            responseDTO.setMessage("Data not found");
             responseDTO.setContent(e.getMessage());
         } catch (Exception e) {
             responseDTO.setCode(VarList.RSP_ERROR);
