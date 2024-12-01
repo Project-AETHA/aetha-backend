@@ -23,8 +23,12 @@ public class FavController {
     }
 
     @PostMapping("/poem/{poemId}")
-    public ResponseEntity<ResponseDTO> addFavPoem(@PathVariable String poemId, @AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(favService.addFavPoem(poemId, userDetails));
+    public ResponseEntity<ResponseDTO> addFavPoem(
+            @PathVariable String poemId,
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(defaultValue = "true") boolean setFav
+    ) {
+        return ResponseEntity.ok(favService.addFavPoem(poemId, userDetails, setFav));
     }
 
 }
