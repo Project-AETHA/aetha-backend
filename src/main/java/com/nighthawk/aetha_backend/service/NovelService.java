@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 public class NovelService {
@@ -149,6 +150,30 @@ public class NovelService {
         return responseDTO;
     }
 
+    public ResponseDTO getAllPendingNovels(){
+
+        try{
+            List<Novel> pendingnovels = novelRepository.findByStatus(ContentStatus.PENDING);
+
+           if(pendingnovels.isEmpty()){
+               responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
+               responseDTO.setMessage("No pending approvals");
+               responseDTO.setContent(null);
+           }else{
+               responseDTO.setCode(VarList.RSP_SUCCESS);
+               responseDTO.setMessage("Successful");
+               responseDTO.setContent(pendingnovels);
+           }
+        }catch (Exception e){
+
+            responseDTO.setCode(VarList.RSP_FAIL);
+            responseDTO.setMessage(e.getMessage());
+
+        }
+
+        return responseDTO;
+    }
+
     //? Paginated response
     public ResponseDTO getAllNovelsPaginated(int page, int pageSize) {
 
@@ -253,6 +278,25 @@ public class NovelService {
         }
 
         return responseDTO;
+    }
+
+    public ResponseDTO viewToApproveNovel(String novelId){
+
+        try{
+            Novel pendingNovel = novelRepository.findById(novelId).orElseThrow(()-> new NoSuchElementException("Novel not found"));
+
+            responseDTO.setCode(VarList.RSP_SUCCESS);
+            responseDTO.setMessage("successful");
+            responseDTO.setContent(pendingNovel);
+
+        } catch (Exception e) {
+
+            responseDTO.setCode(VarList.RSP_FAIL);
+            responseDTO.setMessage(e.getMessage());
+        }
+
+        return responseDTO;
+
     }
 
     public ResponseDTO approveNovel(String novelId) {

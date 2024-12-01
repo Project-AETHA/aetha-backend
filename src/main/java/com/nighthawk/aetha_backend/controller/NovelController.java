@@ -56,7 +56,16 @@ public class NovelController {
     // ? Get all novels
     @GetMapping("/all")
     public ResponseEntity<ResponseDTO> getAllNovels() {
-        return ResponseEntity.ok(novelService.getAllNovels());
+        return ResponseEntity.ok(novelService.getAllNovels()
+        );
+    }
+
+    // ? Get all pending novels
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/all/pendingapprove")
+    public ResponseEntity<ResponseDTO> getAllPendingNovels() {
+        return ResponseEntity.ok(novelService.getAllPendingNovels()
+        );
     }
 
     //? Get all novels paginated
@@ -112,6 +121,13 @@ public class NovelController {
             @RequestParam(defaultValue = "2") int pageSize
     ) {
         return ResponseEntity.ok(novelService.filterNovels(requestDTO, page, pageSize));
+    }
+
+    // ? view novel details to approve
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/viewToApprove/{novelId}")
+    public ResponseEntity<ResponseDTO> viewToApproveNovel(@PathVariable String novelId){
+        return  ResponseEntity.ok(novelService.viewToApproveNovel(novelId));
     }
 
 

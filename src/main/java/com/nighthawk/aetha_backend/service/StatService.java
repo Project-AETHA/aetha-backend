@@ -2,10 +2,7 @@ package com.nighthawk.aetha_backend.service;
 
 import com.nighthawk.aetha_backend.dto.ResponseDTO;
 import com.nighthawk.aetha_backend.dto.StatDTO;
-import com.nighthawk.aetha_backend.repository.AuthUserRepository;
-import com.nighthawk.aetha_backend.repository.NovelRepository;
-import com.nighthawk.aetha_backend.repository.PoemRepository;
-import com.nighthawk.aetha_backend.repository.SupportTicketRepository;
+import com.nighthawk.aetha_backend.repository.*;
 import com.nighthawk.aetha_backend.utils.StatusList;
 import com.nighthawk.aetha_backend.utils.VarList;
 import org.modelmapper.ModelMapper;
@@ -43,6 +40,9 @@ public class StatService {
 
     @Autowired
     private StatDTO statDTO;
+
+    @Autowired
+    private ShortStoryRepository shortStoryRepository;
 
 
     public ResponseDTO getStatistics(){
@@ -133,6 +133,33 @@ public class StatService {
             responseDTO.setMessage(e.getMessage());
             responseDTO.setContent(null);
         }
+
+        return responseDTO;
+    }
+
+    public ResponseDTO getContentCount(){
+
+        try{
+            long novelCount = novelRepository.count();
+            long poemCount = poemRepository.count();
+            long shortStoryCount = shortStoryRepository.count();
+
+            HashMap<String,Object> contentCount = new HashMap<>();
+
+            contentCount.put("novels",novelCount);
+            contentCount.put("poems",poemCount);
+            contentCount.put("shortstories",shortStoryCount);
+
+            responseDTO.setCode(VarList.RSP_SUCCESS);
+            responseDTO.setMessage("successful");
+            responseDTO.setContent(contentCount);
+
+        }catch (Exception e){
+
+            responseDTO.setCode(VarList.RSP_FAIL);
+            responseDTO.setMessage(e.getMessage());
+        }
+
 
         return responseDTO;
     }
