@@ -58,12 +58,16 @@ public class CommentService {
         try {
 
             AuthUser user = userRepository.findByEmail(userDetails.getUsername()).get();
-            Chapter chapter = chapterRepository.findById(commentDTO.getChapter()).get();
+            String novelId = commentDTO.getNovelId();
+            Integer chapterNumber = commentDTO.getChapterNumber();
+            Chapter chapter = chapterRepository.findByNovelIdAndChapterNumber(novelId , chapterNumber).get();
 
-            Comment comment = modelMapper.map(commentDTO, Comment.class);
-            comment.setUser(user);
+            // include data to be saved without moddelmapper
+            Comment comment = new Comment();    
+            comment.setContent(commentDTO.getContent());
             comment.setChapter(chapter);
-            commentRepository.save(comment);
+            comment.setUser(user);  
+            commentRepository.save(comment);         
 
             responseDTO.setCode(VarList.RSP_SUCCESS);
             responseDTO.setMessage("Comment saved successfully.");
