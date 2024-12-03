@@ -29,6 +29,11 @@ public class ReportedContentController {
         return ResponseEntity.ok(reportedContentService.getAllGroupedReportedContent());
     }
 
+    @GetMapping("/get-all-novel-reports")
+    public ResponseEntity<ResponseDTO> getAllNovelReportedContent(){
+        return ResponseEntity.ok(reportedContentService.getAllNovelReportedContent());
+    }
+
     @GetMapping("/get-all-poem-reports/{poemId}")
     public ResponseEntity<ResponseDTO> getAllReportedContentForPoem(@PathVariable String poemId){
         return ResponseEntity.ok(reportedContentService.getAllPoemReports(poemId));
@@ -71,6 +76,4 @@ public class ReportedContentController {
     ){
         return ResponseEntity.ok(reportedContentService.reportNovel(novelReportedContent,userDetails,novelId));
     }
-
-
 }

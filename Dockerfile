@@ -2,7 +2,12 @@ FROM bellsoft/liberica-openjdk-alpine:17 AS builder
 
 WORKDIR /home/app/aetha
 ADD ./ /home/app/aetha
-RUN chmod +x mvnw
+
+# Install dos2unix and convert line endings
+RUN apk add --no-cache dos2unix && \
+    dos2unix mvnw && \
+    chmod +x mvnw
+
 RUN ./mvnw -Dmaven.test.skip=true clean package
 
 FROM bellsoft/liberica-openjre-alpine:17

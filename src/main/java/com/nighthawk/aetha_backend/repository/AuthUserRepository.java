@@ -12,5 +12,4 @@ public interface AuthUserRepository extends MongoRepository<AuthUser, String> {
 
     @Query("{ 'createdAt': { $gte: ?0, $lt: ?1 }, 'role': ?2 }")
     int countByCreatedAtBetweenAndRole(LocalDate startDate, LocalDate endDate, String role);
-
 }
