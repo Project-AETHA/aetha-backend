@@ -273,7 +273,7 @@ public class UserService {
             if (user != null) {
                 responseDTO.setCode(VarList.RSP_SUCCESS);
                 responseDTO.setMessage("User found");
-                responseDTO.setContent(user);
+                    responseDTO.setContent(user);
             } else {
                 responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
                 responseDTO.setMessage("User not found");

@@ -5,6 +5,7 @@ import com.nighthawk.aetha_backend.dto.RequestDTO;
 import com.nighthawk.aetha_backend.dto.ResponseDTO;
 import com.nighthawk.aetha_backend.entity.ebook.EbookExternal;
 import com.nighthawk.aetha_backend.service.EbookExternalService;
+import com.nighthawk.aetha_backend.service.EbookRecordService;
 import com.nighthawk.aetha_backend.service.MailService;
 import com.nighthawk.aetha_backend.utils.VarList;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,21 +23,29 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/api/ebooks")
 public class EbookExternalController {
 
-    @Autowired
-    private ResponseDTO responseDTO;
+    private final ResponseDTO responseDTO;
+    private final EbookExternalService service;
+    private final EbookRecordService ebookRecordService;
+    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final MailService mailService;
+    private final EbookExternalService ebookExternalService;
 
     @Autowired
-    private EbookExternalService service;
-
-    //? Instantiating KafkaTemplate
-    @Autowired
-    KafkaTemplate<String, String> kafkaTemplate;
-
-    //! Temp - Mail service instance
-    @Autowired
-    MailService mailService;
-    @Autowired
-    private EbookExternalService ebookExternalService;
+    public EbookExternalController(
+            ResponseDTO responseDTO,
+            EbookExternalService service,
+            EbookRecordService ebookRecordService,
+            KafkaTemplate<String, String> kafkaTemplate,
+            MailService mailService,
+            EbookExternalService ebookExternalService
+    ) {
+        this.responseDTO = responseDTO;
+        this.service = service;
+        this.ebookRecordService = ebookRecordService;
+        this.kafkaTemplate = kafkaTemplate;
+        this.mailService = mailService;
+        this.ebookExternalService = ebookExternalService;
+    }
 
     @PostMapping("/publish")
     public ResponseEntity<ResponseDTO> publishEbook(
@@ -69,6 +78,9 @@ public class EbookExternalController {
 
         mailService.sendMail(mail);
     }
+
+
+    //! Ebook endpoints for writers
 
     @GetMapping("/{id}")
     public ResponseEntity<ResponseDTO> getBookById(@PathVariable String id) {
@@ -171,6 +183,30 @@ public class EbookExternalController {
             @RequestParam(defaultValue = "10") int pageSize
     ) {
         return ResponseEntity.ok(ebookExternalService.searchEbooks(requestDTO, page, pageSize));
+    }
+
+    //! Ebook endpoints for general users
+
+    //* Buying the book
+    @PostMapping("/buy/{ebookId}")
+    public ResponseEntity<ResponseDTO> buyEBook(
+            @PathVariable String ebookId,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        return ResponseEntity.ok(ebookRecordService.buyEBook(ebookId, userDetails));
+    }
+
+
+    //* Getting all my ebooks
+    @GetMapping("/my-ebooks")
+    public ResponseEntity<ResponseDTO> getMyEbooks(@AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(ebookRecordService.getMyEbooks(userDetails));
+    }
+
+    //* Getting my ebook download link
+    @GetMapping("/my-ebook/{ebookId}")
+    public ResponseEntity<ResponseDTO> getMyEbookDownloadLink(@AuthenticationPrincipal UserDetails userDetails, @PathVariable String ebookId) {
+        return ResponseEntity.ok(ebookRecordService.ebookDownload(ebookId, userDetails));
     }
 
 }

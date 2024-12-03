@@ -12,12 +12,14 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import static com.nighthawk.aetha_backend.utils.StatusList.PENDING;
+
 public interface NovelRepository extends MongoRepository<Novel, String> {
     List<Novel> findByAuthor(AuthUser author);
     Page<Novel> findByAuthor(AuthUser author, Pageable pageable);
     Page<Novel> findByTitle(String title, Pageable pageable);
     long countByStatus(StatusList status);
     long countByPublishedAtBetween(LocalDate startDate, LocalDate endDate);
-
+    List<Novel> findByStatus(ContentStatus status);
     Optional<Novel> findByAuthorAndTitleAndStatus(AuthUser author, String title, ContentStatus contentStatus);
 }

@@ -17,13 +17,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/novels")
 public class NovelController {
 
-    private ResponseDTO response;
-
     @Autowired
     NovelService novelService;
-
-
-    // TODO - moved on to finalizing the eBook module
 
 
     //? Get novel by Novel ID
@@ -43,24 +38,39 @@ public class NovelController {
     }
 
     // ? Update a novel
-    // ! Should include a pre-check of the subscription count, if the content is updated
     @PatchMapping("/update/{novelId}")
     public ResponseEntity<ResponseDTO> updateNovel(@RequestBody Novel novel, @PathVariable String novelId) {
         return ResponseEntity.ok(novelService.updateNovel(novel));
     }
 
     // ? Deleting a novel
-    // ! Should include a pre-check about any subscriptions before deleting a book
     @DeleteMapping("/delete/{novelId}")
     public ResponseEntity<ResponseDTO> deleteNovel(@PathVariable String novelId) {
         return ResponseEntity.ok(novelService.deleteNovel(novelId));
     }
 
 
-    // ? Get all novels
+    // ? Get all novels based on status
     @GetMapping("/all")
+    public ResponseEntity<ResponseDTO> getAllPublishedNovels() {
+        return ResponseEntity.ok(novelService.getAllPublishedNovels()
+        );
+    }
+
+    // ? Get all novels based on status
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/all-novels")
     public ResponseEntity<ResponseDTO> getAllNovels() {
-        return ResponseEntity.ok(novelService.getAllNovels());
+        return ResponseEntity.ok(novelService.getAllNovels()
+        );
+    }
+
+    // ? Get all pending novels
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/all/pendingapprove")
+    public ResponseEntity<ResponseDTO> getAllPendingNovels() {
+        return ResponseEntity.ok(novelService.getAllPendingNovels()
+        );
     }
 
     //? Get all novels paginated
@@ -118,6 +128,13 @@ public class NovelController {
         return ResponseEntity.ok(novelService.filterNovels(requestDTO, page, pageSize));
     }
 
+    // ? view novel details to approve
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/viewToApprove/{novelId}")
+    public ResponseEntity<ResponseDTO> viewToApproveNovel(@PathVariable String novelId){
+        return  ResponseEntity.ok(novelService.viewToApproveNovel(novelId));
+    }
+
 
     //? Approving a novel by the admin
     @PreAuthorize("hasRole('ADMIN')")
@@ -129,8 +146,8 @@ public class NovelController {
     //? Rejecting a novel by the admin
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/reject/{novelId}")
-    public ResponseEntity<ResponseDTO> rejectNovel(@PathVariable String novelId) {
-        return ResponseEntity.ok(novelService.rejectNovel(novelId));
+    public ResponseEntity<ResponseDTO> rejectNovel(@PathVariable String novelId, @RequestBody RequestDTO requestDTO) {
+        return ResponseEntity.ok(novelService.rejectNovel(novelId, requestDTO));
     }
 
 }

@@ -2,10 +2,7 @@ package com.nighthawk.aetha_backend.service;
 
 import com.nighthawk.aetha_backend.dto.ResponseDTO;
 import com.nighthawk.aetha_backend.dto.StatDTO;
-import com.nighthawk.aetha_backend.repository.AuthUserRepository;
-import com.nighthawk.aetha_backend.repository.NovelRepository;
-import com.nighthawk.aetha_backend.repository.PoemRepository;
-import com.nighthawk.aetha_backend.repository.SupportTicketRepository;
+import com.nighthawk.aetha_backend.repository.*;
 import com.nighthawk.aetha_backend.utils.StatusList;
 import com.nighthawk.aetha_backend.utils.VarList;
 import org.modelmapper.ModelMapper;
@@ -14,10 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.*;
 
 
 @Service
@@ -43,6 +37,9 @@ public class StatService {
 
     @Autowired
     private StatDTO statDTO;
+
+    @Autowired
+    private ShortStoryRepository shortStoryRepository;
 
 
     public ResponseDTO getStatistics(){
@@ -107,8 +104,8 @@ public class StatService {
                 LocalDate startOfMonth = sixMonthsAgo.plusMonths(i);
                 LocalDate endOfMonth = startOfMonth.plusMonths(1);
 
-                long readersCount = repository.countByCreatedAtBetweenAndRole(startOfMonth, endOfMonth, "READER");
-                long writersCount = repository.countByCreatedAtBetweenAndRole(startOfMonth, endOfMonth, "WRITER");
+                long readersCount = Optional.ofNullable(repository.countByCreatedAtBetweenAndRole(startOfMonth, endOfMonth, "READER")).orElse(0);
+                long writersCount = Optional.ofNullable(repository.countByCreatedAtBetweenAndRole(startOfMonth, endOfMonth, "WRITER")).orElse(0);
 
                 cumulativeReaders += readersCount;
                 cumulativeWriters += writersCount;
@@ -133,6 +130,33 @@ public class StatService {
             responseDTO.setMessage(e.getMessage());
             responseDTO.setContent(null);
         }
+
+        return responseDTO;
+    }
+
+    public ResponseDTO getContentCount(){
+
+        try{
+            long novelCount = novelRepository.count();
+            long poemCount = poemRepository.count();
+            long shortStoryCount = shortStoryRepository.count();
+
+            HashMap<String,Object> contentCount = new HashMap<>();
+
+            contentCount.put("novels",novelCount);
+            contentCount.put("poems",poemCount);
+            contentCount.put("shortstories",shortStoryCount);
+
+            responseDTO.setCode(VarList.RSP_SUCCESS);
+            responseDTO.setMessage("successful");
+            responseDTO.setContent(contentCount);
+
+        }catch (Exception e){
+
+            responseDTO.setCode(VarList.RSP_FAIL);
+            responseDTO.setMessage(e.getMessage());
+        }
+
 
         return responseDTO;
     }

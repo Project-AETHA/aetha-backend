@@ -11,6 +11,5 @@ public interface AuthUserRepository extends MongoRepository<AuthUser, String> {
     Optional<AuthUser> findByEmail(String email);
 
     @Query("{ 'createdAt': { $gte: ?0, $lt: ?1 }, 'role': ?2 }")
-    long countByCreatedAtBetweenAndRole(LocalDate startDate, LocalDate endDate, String role);
-
+    int countByCreatedAtBetweenAndRole(LocalDate startDate, LocalDate endDate, String role);
 }
