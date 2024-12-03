@@ -70,17 +70,19 @@ public class PoemController {
     @PutMapping("update/upvote/{id}")
     public ResponseEntity<ResponseDTO> updateUpvote(
             @PathVariable String id,
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(defaultValue = "true") boolean increment
     ){
-        return ResponseEntity.ok(poemService.updateUpvote(id, userDetails));
+        return ResponseEntity.ok(poemService.updateUpvote(id, userDetails, increment));
     }
 
     @PutMapping("update/downvote/{id}")
     public ResponseEntity<ResponseDTO> updateDownvote(
             @PathVariable String id,
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(defaultValue = "true") boolean increment
     ){
-        return ResponseEntity.ok(poemService.updateDownvote(id, userDetails));
+        return ResponseEntity.ok(poemService.updateDownvote(id, userDetails, increment));
     }
 
 

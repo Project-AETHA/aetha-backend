@@ -23,9 +23,14 @@ public class RatingController {
         this.responseDTO = responseDTO;
     }
 
-    @GetMapping("/getRating")
-    public ResponseEntity<ResponseDTO> getRating() {
-        return new ResponseEntity<>(ratingService.getRating(), HttpStatus.OK);
+    @GetMapping("/getRatings/personal")
+    public ResponseEntity<ResponseDTO> getPersonalRatings(@RequestParam String novelId, @AuthenticationPrincipal UserDetails userDetails) {
+        return new ResponseEntity<>(ratingService.getRatingsById(novelId, userDetails), HttpStatus.OK);
+    }
+
+    @GetMapping("/getRatings")
+    public ResponseEntity<ResponseDTO> getRatings(@RequestParam String novelId) {
+        return new ResponseEntity<>(ratingService.getRatings(novelId), HttpStatus.OK);
     }
 
     @PostMapping("/saveRating")

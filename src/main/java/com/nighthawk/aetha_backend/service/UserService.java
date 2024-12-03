@@ -5,6 +5,7 @@ import com.nighthawk.aetha_backend.dto.StatDTO;
 import com.nighthawk.aetha_backend.dto.UserDTO;
 import com.nighthawk.aetha_backend.entity.AccStatus;
 import com.nighthawk.aetha_backend.entity.AuthUser;
+import com.nighthawk.aetha_backend.entity.Role;
 import com.nighthawk.aetha_backend.repository.AuthUserRepository;
 import com.nighthawk.aetha_backend.repository.NovelRepository;
 import com.nighthawk.aetha_backend.repository.SupportTicketRepository;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Service
@@ -271,7 +273,7 @@ public class UserService {
             if (user != null) {
                 responseDTO.setCode(VarList.RSP_SUCCESS);
                 responseDTO.setMessage("User found");
-                responseDTO.setContent(user);
+                    responseDTO.setContent(user);
             } else {
                 responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
                 responseDTO.setMessage("User not found");
@@ -283,6 +285,29 @@ public class UserService {
             responseDTO.setContent(null);
         }
 
+        return responseDTO;
+    }
+
+    public ResponseDTO upgradeUser(UserDetails userDetails) {
+        try {
+            AuthUser user = repository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new NoSuchElementException("User not found"));
+
+            if(user.getRole().equals(Role.READER)) {
+                user.setRole(Role.WRITER);
+            } else if(user.getRole().equals(Role.ADMIN)) {
+                throw new Exception("Admin cannot be upgraded");
+            }
+
+            AuthUser upgradedUser = repository.save(user);
+
+            responseDTO.setCode(VarList.RSP_SUCCESS);
+            responseDTO.setMessage("User upgraded Successfully");
+            responseDTO.setContent(upgradedUser);
+        } catch (Exception e) {
+            responseDTO.setCode(VarList.RSP_ERROR);
+            responseDTO.setMessage(e.getMessage());
+            responseDTO.setContent(null);
+        }
         return responseDTO;
     }
 }
