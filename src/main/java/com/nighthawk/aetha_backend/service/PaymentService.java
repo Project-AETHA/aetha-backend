@@ -2,6 +2,7 @@ package com.nighthawk.aetha_backend.service;
 
 import com.nighthawk.aetha_backend.dto.PaymentRequestDTO;
 import com.nighthawk.aetha_backend.dto.PaymentResponseDTO;
+import com.nighthawk.aetha_backend.entity.Payment;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
@@ -19,6 +20,7 @@ public class PaymentService {
     public PaymentResponseDTO checkoutPayments(PaymentRequestDTO paymentRequestDTO, UserDetails userDetails) {
         Stripe.apiKey = secretKey;
 
+
         // Log or verify the authenticated user's details
         String authenticatedUsername = userDetails.getUsername();
         System.out.println("Processing payment for user: " + authenticatedUsername);
@@ -32,7 +34,7 @@ public class PaymentService {
         // Create price data
         SessionCreateParams.LineItem.PriceData priceData =
                 SessionCreateParams.LineItem.PriceData.builder()
-                        .setCurrency(paymentRequestDTO.getCurrency() != null ? paymentRequestDTO.getCurrency() : "USD")
+                        .setCurrency(paymentRequestDTO.getCurrency() != null ? paymentRequestDTO.getCurrency() : "LKR")
                         .setUnitAmount(paymentRequestDTO.getAmount())
                         .setProductData(productData)
                         .build();
@@ -47,8 +49,8 @@ public class PaymentService {
         // Create session
         SessionCreateParams params = SessionCreateParams.builder()
                 .setMode(SessionCreateParams.Mode.PAYMENT)
-                .setSuccessUrl("http://localhost:8080/success")
-                .setCancelUrl("http://localhost:8080/cancel")
+                .setSuccessUrl("http://localhost:5173/success?sessionId={CHECKOUT_SESSION_ID}&adId=" + paymentRequestDTO.getAdId())
+                .setCancelUrl("http://localhost:5173/cancel")
                 .addLineItem(lineItem)
                 .build();
 

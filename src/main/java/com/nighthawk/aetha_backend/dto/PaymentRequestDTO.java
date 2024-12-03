@@ -19,4 +19,6 @@ public class PaymentRequestDTO {
     private String name;
     private String currency;
     private Date paymentDate;
+    private String adId;
+    private String internalTitle;
 }

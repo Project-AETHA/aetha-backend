@@ -26,7 +26,10 @@ public class Ad {
     private String backgroundImage;
     private String redirectLink;
     private Date startDate;
-    private String selectedPlan;
+    private Date endDate;
+    private Long calculatedPrice;
+    private String status;
+    private Date createdAt;
 
     // Additional fields for tracking metrics
     private Integer impressions = 0;       // Number of times the ad has been viewed
@@ -53,6 +56,9 @@ public class Ad {
 
     public void setIsActive(boolean b) {
     }
+
+
+
 
     // Constructors, getters, and setters can be generated automatically by Lombok
 }
