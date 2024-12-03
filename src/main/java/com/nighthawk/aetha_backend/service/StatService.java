@@ -104,8 +104,8 @@ public class StatService {
                 LocalDate startOfMonth = sixMonthsAgo.plusMonths(i);
                 LocalDate endOfMonth = startOfMonth.plusMonths(1);
 
-                long readersCount = Optional.ofNullable(repository.countByCreatedAtBetweenAndRole(startOfMonth, endOfMonth, "READER")).orElse(0L);
-                long writersCount = Optional.ofNullable(repository.countByCreatedAtBetweenAndRole(startOfMonth, endOfMonth, "WRITER")).orElse(0L);
+                long readersCount = Optional.ofNullable(repository.countByCreatedAtBetweenAndRole(startOfMonth, endOfMonth, "READER")).orElse(0);
+                long writersCount = Optional.ofNullable(repository.countByCreatedAtBetweenAndRole(startOfMonth, endOfMonth, "WRITER")).orElse(0);
 
                 cumulativeReaders += readersCount;
                 cumulativeWriters += writersCount;
