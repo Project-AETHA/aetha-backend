@@ -262,4 +262,21 @@ public class ReportedContentService {
         }
         return responseDTO;
     }
+
+    public ResponseDTO getAllNovelReportedContent() {
+
+        try {
+            List<NovelReportedContent> novelReports = novelReportedContentRepository.findAll();
+
+            responseDTO.setCode(VarList.RSP_SUCCESS);
+            responseDTO.setMessage("Success");
+            responseDTO.setContent(novelReports);
+        } catch (Exception e) {
+            responseDTO.setCode(VarList.RSP_ERROR);
+            responseDTO.setMessage("Failed");
+            responseDTO.setContent(e.getMessage());
+        }
+
+        return responseDTO;
+    }
 }

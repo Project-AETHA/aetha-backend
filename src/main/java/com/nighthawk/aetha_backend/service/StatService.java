@@ -11,10 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.*;
 
 
 @Service
@@ -107,8 +104,8 @@ public class StatService {
                 LocalDate startOfMonth = sixMonthsAgo.plusMonths(i);
                 LocalDate endOfMonth = startOfMonth.plusMonths(1);
 
-                long readersCount = repository.countByCreatedAtBetweenAndRole(startOfMonth, endOfMonth, "READER");
-                long writersCount = repository.countByCreatedAtBetweenAndRole(startOfMonth, endOfMonth, "WRITER");
+                long readersCount = Optional.ofNullable(repository.countByCreatedAtBetweenAndRole(startOfMonth, endOfMonth, "READER")).orElse(0);
+                long writersCount = Optional.ofNullable(repository.countByCreatedAtBetweenAndRole(startOfMonth, endOfMonth, "WRITER")).orElse(0);
 
                 cumulativeReaders += readersCount;
                 cumulativeWriters += writersCount;

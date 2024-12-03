@@ -8,18 +8,17 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.DocumentReference;
 
 @Data
-@Document(collection = "favPoem")
-@AllArgsConstructor
 @NoArgsConstructor
-public class FavPoem {
+@AllArgsConstructor
+@Document(collection = "favNovel")
+public class FavNovel {
 
     @Id
     private String id;
 
-    @DocumentReference(collection = "poems")
-    private Poem poem;
+    @DocumentReference(collection = "novels")
+    private Novel novel;
 
     @DocumentReference(collection = "users")
     private AuthUser user;
-
 }

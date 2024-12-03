@@ -11,6 +11,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.DocumentReference;
 
+import java.security.cert.CertPathValidatorException.Reason;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
@@ -55,6 +56,7 @@ public class Novel {
 
     //? Published datetime will be added when the admin has approved and published the novel
     private LocalDate publishedAt;
+    private String reasonForRejection;
 
     //! Data for analytics
     private Integer views = 0;
