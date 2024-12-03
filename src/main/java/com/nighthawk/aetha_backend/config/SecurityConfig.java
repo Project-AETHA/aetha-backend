@@ -52,7 +52,8 @@ public class SecurityConfig {
                                     "/api/payment/success",
                                     "/api/payment/cancel",
                                     "/api/subscription/get-tiers/**",
-                                    "/api/poems/**"
+                                    "/api/poems/**",
+                                    "/api/comments/getComments"
                             )
                             .permitAll()
                             .anyRequest().authenticated()

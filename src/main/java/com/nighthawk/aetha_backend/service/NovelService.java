@@ -183,6 +183,21 @@ public class NovelService {
         return responseDTO;
     }
 
+    public ResponseDTO getAllPublishedNovels() {
+
+        try {
+            responseDTO.setCode(VarList.RSP_SUCCESS);
+            responseDTO.setMessage("All novels fetched successfully");
+            responseDTO.setContent(novelRepository.findByStatus(ContentStatus.PUBLISHED));
+        } catch (Exception e) {
+            responseDTO.setCode(VarList.RSP_ERROR);
+            responseDTO.setMessage("Error fetching novels");
+            responseDTO.setContent(null);
+        }
+
+        return responseDTO;
+    }
+
     public ResponseDTO getAllNovels() {
 
         try {
@@ -365,12 +380,14 @@ public class NovelService {
         return responseDTO;
     }
 
-    public ResponseDTO rejectNovel(String novelId) {
+    public ResponseDTO rejectNovel(String novelId, RequestDTO requestDTO) {
         try {
 
             //? Updating the novel's status
             Novel novel = novelRepository.findById(novelId).orElseThrow(() -> new RuntimeException("Novel not found"));
             novel.setStatus(ContentStatus.REJECTED);
+            novel.setReasonForRejection(requestDTO.getRejectionReason());
+
             novelRepository.save(novel);
 
             //? Sending notification to the author about the rejection
