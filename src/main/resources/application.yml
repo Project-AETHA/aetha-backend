@@ -105,4 +105,5 @@ logging:
       clean-history-on-start: true
 
 stripe:
-  secretKey: sk_test_51QP61WCkUdcRvIU2Bmn3LFjxZUducbMml7vMwAq4gwXlaNGAHWbGfLoVIK3t02tVTd0wa7auF7R24yhl86Bf8GW6000cVtoBD0
+  secretKey: "sk_test_51QRF0PLARPgxtdfuEkbEM48Ca7qf5lcOpt0xKDPaW8JE4tsEct3bxmGAlWUFWk0xMtjBVYrAWwCww4dVVsX8royF00NzEEA87Y"
+

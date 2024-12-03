@@ -15,7 +15,8 @@ public class AdDTO {
     private String backgroundImage;
     private String redirectLink;
     private Date startDate;
-    private String selectedPlan;
+    private Date endDate;
+    private Long calculatedPrice;
 
     // Creator information
     private String creatorId;

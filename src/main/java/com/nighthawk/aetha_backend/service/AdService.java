@@ -33,9 +33,10 @@ public class AdService {
     private ModelMapper modelMapper;
 
     @Transactional
-    public ResponseDTO createAd(AdDTO adDTO, UserDetails userDetails) {
+    public ResponseDTO createPendingAd(AdDTO adDTO, UserDetails userDetails) {
         AuthUser user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
         Ad newAd = new Ad();
+
         HashMap<String, String> errors = new HashMap<>();
 
         try {
@@ -52,8 +53,10 @@ public class AdService {
             newAd.setBackgroundImage(adDTO.getBackgroundImage());
             newAd.setRedirectLink(adDTO.getRedirectLink());
             newAd.setStartDate(adDTO.getStartDate());
-            newAd.setSelectedPlan(adDTO.getSelectedPlan());
+            newAd.setEndDate(adDTO.getEndDate());
+            newAd.setCalculatedPrice(adDTO.getCalculatedPrice());
             newAd.setIsActive(true);
+            newAd.setStatus("PAYMENT_PENDING");
 
             // Validation
             if (adDTO.getInternalTitle() == null || adDTO.getInternalTitle().isEmpty()) {
@@ -71,16 +74,19 @@ public class AdService {
             if (adDTO.getStartDate() == null) {
                 errors.put("startDate", "Start date is required");
             }
+            if (adDTO.getEndDate() == null) {
+                errors.put("EndDate", "End date is required");
+            }
 
-            if (adDTO.getSelectedPlan() == null || adDTO.getSelectedPlan().isEmpty()) {
-                errors.put("selectedPlan", "Selected plan is required");
+            if (adDTO.getCalculatedPrice() == null){
+                errors.put("calculatedPrice", "Calculated Price is required");
             }
 
             if(errors.isEmpty()) {
                 Ad savedAd = adRepository.save(newAd);
                 AdDTO responseAdDTO = convertToDTO(savedAd);
                 responseDTO.setCode(VarList.RSP_SUCCESS);
-                responseDTO.setMessage("Ad created successfully");
+                responseDTO.setMessage("Ad created, ready for payment");
                 responseDTO.setContent(responseAdDTO);
             } else {
                 responseDTO.setCode(VarList.RSP_VALIDATION_FAILED);
@@ -96,6 +102,26 @@ public class AdService {
             responseDTO.setErrors(errors);
         }
 
+        return responseDTO;
+    }
+
+    @Transactional
+    public ResponseDTO confirmAdPayment(String adId, String paymentSessionId) {
+        Ad ad = adRepository.findById(adId).orElse(null);
+
+        if (ad == null) {
+            responseDTO.setCode(VarList.RSP_FAIL);
+            responseDTO.setMessage("Ad not found");
+            return responseDTO;
+        }
+
+        // Verify payment with Stripe (you'd typically do a server-side verification)
+        ad.setStatus("ACTIVE");
+        ad.setCreatedAt(new Date());
+        adRepository.save(ad);
+
+        responseDTO.setCode(VarList.RSP_SUCCESS);
+        responseDTO.setMessage("Ad Created successfully");
         return responseDTO;
     }
 
@@ -223,8 +249,8 @@ public class AdService {
         if (adDTO.getStartDate() != null) {
             existingAd.setStartDate(adDTO.getStartDate());
         }
-        if (adDTO.getSelectedPlan() != null) {
-            existingAd.setSelectedPlan(adDTO.getSelectedPlan());
+        if (adDTO.getCalculatedPrice() != null) {
+            existingAd.setCalculatedPrice(adDTO.getCalculatedPrice());
         }
 
         try {
@@ -249,7 +275,7 @@ public class AdService {
         dto.setBackgroundImage(ad.getBackgroundImage());
         dto.setRedirectLink(ad.getRedirectLink());
         dto.setStartDate(ad.getStartDate());
-        dto.setSelectedPlan(ad.getSelectedPlan());
+        dto.setCalculatedPrice(ad.getCalculatedPrice());
         return dto;
     }
 }
