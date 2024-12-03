@@ -53,7 +53,9 @@ public class SecurityConfig {
                                     "/api/payment/cancel",
                                     "/api/subscription/get-tiers/**",
                                     "/api/poems/**",
-                                    "/api/comments/getComments"
+                                    "/api/comments/getComments",
+                                    "/api/ratings/getRatings",
+                                    "/api/forum/getForum"
                             )
                             .permitAll()
                             .anyRequest().authenticated()

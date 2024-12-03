@@ -14,7 +14,8 @@ import java.util.Date;
 public class CommentDTO {
     private String id;
     private String content;
-    private String chapter;
+    private String novelId;
+    private Integer chapterNumber;
     private String user;
     private LocalDate createdAt = new Date().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 }
