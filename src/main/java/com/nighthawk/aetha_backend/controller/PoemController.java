@@ -4,14 +4,11 @@ import com.nighthawk.aetha_backend.dto.PoemDTO;
 import com.nighthawk.aetha_backend.dto.ResponseDTO;
 import com.nighthawk.aetha_backend.entity.Poem;
 import com.nighthawk.aetha_backend.service.PoemService;
-import com.nighthawk.aetha_backend.utils.VarList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 // ? samanyen backend eka run wens port eken ena request withrai accept karanne.e nisa one port ekakin ena ewa accept
 // ? karanna puluwan widiyta annotation ekaka danna ona.
