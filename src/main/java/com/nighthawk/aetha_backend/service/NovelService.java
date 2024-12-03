@@ -365,7 +365,7 @@ public class NovelService {
     public ResponseDTO approveNovel(String novelId) {
         try {
             Novel novel = novelRepository.findById(novelId).orElseThrow(() -> new RuntimeException("Novel not found"));
-            novel.setStatus(ContentStatus.APPROVED);
+            novel.setStatus(ContentStatus.PUBLISHED);
             novelRepository.save(novel);
 
             responseDTO.setCode(VarList.RSP_SUCCESS);
