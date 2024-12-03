@@ -35,4 +35,7 @@ public class RequestDTO {
     //? Comment
     private String novel;
     private String user;
+
+    //? RejectionReason
+    private String rejectionReason;
 }
