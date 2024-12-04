@@ -33,6 +33,7 @@ public class SupportTicket {
     private List<String> attachments;
 
     private StatusList status = StatusList.PENDING;
+    private String adminResponse;
 
     @DocumentReference(collection = "users")
     private AuthUser handledBy;

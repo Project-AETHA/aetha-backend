@@ -1,5 +1,6 @@
 package com.nighthawk.aetha_backend.service;
 
+import com.nighthawk.aetha_backend.dto.RequestDTO;
 import com.nighthawk.aetha_backend.dto.ResponseDTO;
 import com.nighthawk.aetha_backend.entity.AuthUser;
 import com.nighthawk.aetha_backend.entity.SupportTicket;
@@ -7,6 +8,7 @@ import com.nighthawk.aetha_backend.entity.SupportType;
 import com.nighthawk.aetha_backend.repository.AuthUserRepository;
 import com.nighthawk.aetha_backend.repository.SupportTicketRepository;
 import com.nighthawk.aetha_backend.utils.FileUploadUtil;
+import com.nighthawk.aetha_backend.utils.StatusList;
 import com.nighthawk.aetha_backend.utils.VarList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -271,6 +273,50 @@ public class SupportService {
         } catch (Exception e) {
             responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
             responseDTO.setMessage("An error occurred while deleting the ticket");
+            responseDTO.setContent(e.getMessage());
+        }
+
+        return responseDTO;
+    }
+
+    public ResponseDTO updateSolved(String id, UserDetails userDetails, RequestDTO requestDTO) {
+        try {
+            AuthUser handledUser = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new NoSuchElementException("User not found"));
+            SupportTicket ticket = supportRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Ticket not found"));
+
+            ticket.setStatus(StatusList.SOLVED);
+            ticket.setHandledBy(handledUser);
+            ticket.setAdminResponse(requestDTO.getComment());
+            supportRepository.save(ticket);
+
+            responseDTO.setCode(VarList.RSP_SUCCESS);
+            responseDTO.setMessage("Ticket marked as solved");
+            responseDTO.setContent(ticket);
+        } catch (Exception e) {
+            responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
+            responseDTO.setMessage("An error occurred while updating the ticket");
+            responseDTO.setContent(e.getMessage());
+        }
+
+        return responseDTO;
+    }
+
+    public ResponseDTO updateUnsolved(String id, UserDetails userDetails, RequestDTO requestDTO) {
+        try {
+            AuthUser handledUser = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new NoSuchElementException("User not found"));
+            SupportTicket ticket = supportRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Ticket not found"));
+
+            ticket.setStatus(StatusList.DECLINED);
+            ticket.setHandledBy(handledUser);
+            ticket.setAdminResponse(requestDTO.getComment());
+            supportRepository.save(ticket);
+
+            responseDTO.setCode(VarList.RSP_SUCCESS);
+            responseDTO.setMessage("Ticket marked as unsolved");
+            responseDTO.setContent(ticket);
+        } catch (Exception e) {
+            responseDTO.setCode(VarList.RSP_NO_DATA_FOUND);
+            responseDTO.setMessage("An error occurred while updating the ticket");
             responseDTO.setContent(e.getMessage());
         }
 
