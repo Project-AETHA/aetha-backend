@@ -84,11 +84,13 @@ public class AdService {
             }
 
             if(errors.isEmpty()) {
+
                 savedAd = adRepository.save(newAd);
-                AdDTO responseAdDTO = convertToDTO(savedAd);
+                System.out.println("ad Id"+savedAd.getId());
                 responseDTO.setCode(VarList.RSP_SUCCESS);
                 responseDTO.setMessage("Ad created, ready for payment");
-                responseDTO.setContent(responseAdDTO);
+                responseDTO.setContent(savedAd.getId());
+                System.out.println(responseDTO);
             } else {
                 responseDTO.setCode(VarList.RSP_VALIDATION_FAILED);
                 responseDTO.setMessage("Validation failed");
@@ -99,8 +101,9 @@ public class AdService {
         } catch (Exception e) {
             responseDTO.setCode(VarList.RSP_ERROR);
             responseDTO.setMessage(e.getMessage());
-            responseDTO.setContent(savedAd.getId());
+            responseDTO.setContent(null);
             responseDTO.setErrors(errors);
+
         }
 
         return responseDTO;

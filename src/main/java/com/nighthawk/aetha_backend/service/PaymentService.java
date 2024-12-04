@@ -48,6 +48,7 @@ public class PaymentService {
                         .build();
 
         // Create session
+        System.out.println(paymentRequestDTO.getAdId());
         SessionCreateParams params = SessionCreateParams.builder()
                 .setMode(SessionCreateParams.Mode.PAYMENT)
                 .setSuccessUrl("http://localhost:5173/success?sessionId={CHECKOUT_SESSION_ID}&adId=" + paymentRequestDTO.getAdId())
