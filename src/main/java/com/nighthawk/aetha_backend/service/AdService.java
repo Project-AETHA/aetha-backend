@@ -36,6 +36,7 @@ public class AdService {
     public ResponseDTO createPendingAd(AdDTO adDTO, UserDetails userDetails) {
         AuthUser user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
         Ad newAd = new Ad();
+        Ad savedAd = new Ad();
 
         HashMap<String, String> errors = new HashMap<>();
 
@@ -83,7 +84,7 @@ public class AdService {
             }
 
             if(errors.isEmpty()) {
-                Ad savedAd = adRepository.save(newAd);
+                savedAd = adRepository.save(newAd);
                 AdDTO responseAdDTO = convertToDTO(savedAd);
                 responseDTO.setCode(VarList.RSP_SUCCESS);
                 responseDTO.setMessage("Ad created, ready for payment");
@@ -98,7 +99,7 @@ public class AdService {
         } catch (Exception e) {
             responseDTO.setCode(VarList.RSP_ERROR);
             responseDTO.setMessage(e.getMessage());
-            responseDTO.setContent(null);
+            responseDTO.setContent(savedAd.getId());
             responseDTO.setErrors(errors);
         }
 
@@ -106,24 +107,32 @@ public class AdService {
     }
 
     @Transactional
-    public ResponseDTO confirmAdPayment(String adId, String paymentSessionId) {
-        Ad ad = adRepository.findById(adId).orElse(null);
+    public ResponseDTO confirmAdPayment(String adId, String sessionId) {
+        try {
+            ResponseDTO responseDTO = new ResponseDTO();
+            Ad ad = adRepository.findById(adId).orElse(null);
 
-        if (ad == null) {
-            responseDTO.setCode(VarList.RSP_FAIL);
-            responseDTO.setMessage("Ad not found");
+            if (ad == null) {
+                responseDTO.setCode(VarList.RSP_FAIL);
+                responseDTO.setMessage("Ad not found");
+                return responseDTO;
+            }
+
+            ad.setStatus("ACTIVE");
+            ad.setCreatedAt(new Date());
+            adRepository.save(ad);
+
+            responseDTO.setCode(VarList.RSP_SUCCESS);
+            responseDTO.setMessage("Ad Created successfully");
             return responseDTO;
+        } catch (Exception e) {
+            responseDTO.setCode(VarList.RSP_ERROR);
+            responseDTO.setMessage("Error creating ad");
+            return responseDTO;
+
         }
-
-        // Verify payment with Stripe (you'd typically do a server-side verification)
-        ad.setStatus("ACTIVE");
-        ad.setCreatedAt(new Date());
-        adRepository.save(ad);
-
-        responseDTO.setCode(VarList.RSP_SUCCESS);
-        responseDTO.setMessage("Ad Created successfully");
-        return responseDTO;
     }
+
 
     public ResponseDTO findAdById(String id) {
         Ad ad = adRepository.findById(id).orElse(null);

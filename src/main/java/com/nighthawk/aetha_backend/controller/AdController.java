@@ -26,22 +26,12 @@ public class AdController {
         return new ResponseEntity<>(adService.createPendingAd(adDTO, userDetails), HttpStatus.OK);
     }
 
-    @GetMapping("/success")
-    public ResponseEntity<String> handlePaymentSuccess(
+    @PutMapping("/success")
+    public ResponseEntity<ResponseDTO> handlePaymentSuccess(
             @RequestParam("sessionId") String sessionId,
             @RequestParam("adId") String adId
     ) {
-        // Verify payment and activate ad
-        ResponseDTO response = adService.confirmAdPayment(adId, sessionId);
-
-        if ("00".equals(response.getCode())) {
-            // Redirect to frontend success page
-            return ResponseEntity.status(HttpStatus.FOUND)
-                    .header(HttpStatus.FOUND.getReasonPhrase(), "http://localhost:3000/ad-created-success")
-                    .build();
-        }
-
-        return ResponseEntity.badRequest().body("Payment confirmation failed");
+        return ResponseEntity.ok(adService.confirmAdPayment(adId, sessionId));
     }
 
     @GetMapping("/{id}")
