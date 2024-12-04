@@ -1,19 +1,21 @@
 package com.nighthawk.aetha_backend.service;
 
+import com.nighthawk.aetha_backend.dto.ResponseDTO;
 import com.nighthawk.aetha_backend.entity.AuthUser;
-import com.nighthawk.aetha_backend.entity.Click;
 import com.nighthawk.aetha_backend.entity.History;
 import com.nighthawk.aetha_backend.entity.Novel;
 import com.nighthawk.aetha_backend.repository.AuthUserRepository;
-import com.nighthawk.aetha_backend.repository.ClicksRepository;
 import com.nighthawk.aetha_backend.repository.HistoryRepository;
 import com.nighthawk.aetha_backend.repository.NovelRepository;
+import com.nighthawk.aetha_backend.utils.VarList;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.logging.Logger;
 
@@ -52,6 +54,26 @@ public class HistoryService {
         } catch (NoSuchElementException e) {
             logger.warning("User not found, click was not recorded. User -> " + userDetails.getUsername());
         }
+    }
+
+    public ResponseDTO getMyHistory (UserDetails userDetails) {
+        ResponseDTO responseDTO = new ResponseDTO();
+
+        try {
+            AuthUser user = authUserRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new NoSuchElementException("User not found"));
+            List<History> history = historyRepository.findByUser(user);
+
+            responseDTO.setCode(VarList.RSP_SUCCESS);
+            responseDTO.setMessage("Success");
+            responseDTO.setContent(history);
+
+        } catch (NoSuchElementException e) {
+            responseDTO.setCode(VarList.RSP_ERROR);
+            responseDTO.setMessage("User not found");
+        }
+        
+
+        return responseDTO;
     }
 
 }
