@@ -55,7 +55,7 @@ public class StatService {
             statDTO.setPendingNovelApprovals(pendingNovelApprovals);
 
             //complaints donut chart
-            long completedComplaints = supportTicketRepository.countByStatus(StatusList.COMPLETED);
+            long completedComplaints = supportTicketRepository.countByStatus(StatusList.SOLVED  );
             long pendingComplaints = supportTicketRepository.countByStatus(StatusList.PENDING);
 
             statDTO.setCompletedComplaints(completedComplaints);
