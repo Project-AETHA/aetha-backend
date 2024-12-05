@@ -21,7 +21,7 @@ public class History {
     @DBRef(lazy = true)
     private Novel novel;
 
-    @CreatedDate
+    @Builder.Default
     private Date createdAt = new Date();
 
 }
